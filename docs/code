@@ -1,0 +1,251 @@
+﻿# フロントエンドコード規約
+
+## はじめに
+フロントエンドでは、eslint/prettierの設定に沿ってコードを記載してください。  
+eslint/prettierの設定で指定できないものを以降にコード規約として記載します。
+
+- eslint/prettierの設定やコード規約と異なるコードを書く場合、理由をコメントで記載すること。
+
+## 命名規則
+
+1. TypeScript（JavaScript）・Reactの命名に従うものとし、外部（プログラムを書いた人以外）の人が見てもわかりやすい名称を命名し、独自のルールで単語の文字を省略しないこと。  
+   保守性を高めるため。
+2. 単語（主に英単語）を使用する際は、DBテーブル名やカラム名、ドメイン名から、適切な単語を探し使用すること。  
+   同じマスターや設定を別の英単語で命名されることを避けるため。  
+   以降の規則では上記のような単語を「プロジェクトで決められた単語」と記載します。
+3. 単語は4個以内にとどめる。  
+   可読性を向上させるため。  
+   例: 〇 `pdfTextSearch` / △ `pdfPageTextSearchButton`（長すぎる）
+
+### 命名規則詳細
+
+| 対象 | 命名規則 | 理由と例外 | 良い例 | 悪い例 |
+| - | - | - | - | - |
+| ディレクトリ名 | パスカルケース（アッパーキャメルケース）かつプロジェクトで決められた単語 | 同じ名称の画面が複数存在する場合に、ディレクトリ名でどの分類かを明確にするため | 医師の英語が別のディレクトリで一致: `organisms/Master/Doctor/` と `pages/Master/Doctor/` | 病室の英語が別のディレクトリで不一致: `organisms/Master/HospitalRoom/` と `pages/Master/SickRoom/` |
+| ページのコンポーネント・ファイル名 | パスカルケース（アッパーキャメルケース）かつ画面に表示する名称を英訳した文言 | 画面の名称を明確にするため。<br>例外: 設定一覧やマスター一覧から遷移して初めに表示される画面（医師一覧画面）の場合は、類似したファイル名が複数存在することを避けるため、プロジェクトで決められた単語で命名し、`List`という文言を使用しない | `Doctor.tsx`（医師一覧画面） / `UsageDetail.tsx`（用法詳細画面） | `DoctorList.tsx`（テーブルコンポーネントか医師一覧画面か区別しにくい） |
+| organismsのコンポーネント・ファイル名 | パスカルケース（アッパーキャメルケース）かつ画面名称英訳 + `Create` または `Update` + コンポーネント形式 | 画面の名称を明確にするため。同じ名称の画面でも、見た目・動き・処理都合で登録と編集を分ける場合があるため。<br>例外: エンドポイント・見た目・動き・処理上、登録と編集で差異が無く同一コンポーネントで実装する場合は `Create` / `Update` を省略可 | `DoctorInformationCreateDrawer` / `DoctorListTable` | `DoctorCreate`（形式不明） / `DoctorTable`（単語不足） |
+| 他のコンポーネント以外のファイル名 | ローワーキャメルケースかつプロジェクトで決められた単語 | なんのファイルか明確にするため |  |  |
+| 変数（一覧データ管理） | ローワーキャメルケースかつ画面に表示する一覧名称英訳 + `List` | あいまいな名称による可読性低下を防ぐため。<br>例外: 一覧が画面上1つの場合は「一覧名称英訳」を省略可 | `const [list, setList] = useState()` | `const [data, setData] = useState()`（何のデータか不明） |
+| 一覧データの`map`時 | ローワーキャメルケースかつプロジェクトで決められた単語 | 一覧データが何のデータか明確にするため | `{list.doctors.map((doctor) => ...` | `{list.doctors.map((data) => ...`（データの意味が不明） |
+
+## 全体
+
+1. 型（タイプ）を必ず指定すること。  
+   型指定が不可のため`any`にする場合は、理由をコメントとして必ず残すこと。  
+   型宣言を使用し、型アサーションのような型の上書きはやむをえない理由がない限り避けること。
+2. 定数定義は`src/constants`配下でファイル作成し、必ず行うこと。  
+   一貫性を保つため。コンポーネントファイルへのベタ書きは定義のばらつきを招くため。
+3. 型エイリアス（型を`as`で省略）を必ず行うこと。  
+   可読性向上のため。型のimport時に行う。  
+   例:
+
+```ts
+import type {
+  Takazono_Core_Application_Port_OliveBackupPorts_BackupSettings_Commands_UpdateOliveBackupSettingCommand as UpdateOliveBackupSettingCommand,
+} from 'api/@types'
+```
+
+4. インデントは半角スペース2文字にすること。  
+   可読性向上のため。
+
+## ファイルに関して
+
+1. ディレクトリにファイルを作成するときは`index`ファイルを必ず作成すること。  
+   import文を整頓し、可読性を上げるため。  
+   例:
+
+```text
+directory1
+  ┣ index.tsx
+  ┣ file1.tsx
+  ┣ file2.tsx
+  ┗ ...
+```
+
+2. ファイルの先頭行に画面・ドロワー・テーブルの名称をコメントで記載すること。  
+   ファイル内容を明確にし、探しやすくするため。
+
+## コンポーネント切り分け方法について
+
+1. atomicDesignとXDに従ってコンポーネントを分けて実装し、画面内にテーブルがある場合はテーブル部分を別コンポーネントに分けること。  
+   テーブルはJSXが複雑になり、可読性低下を防ぐため。
+
+## パラメータ・関数の使用に関して
+
+1. 子コンポーネントにPropsとして関数や変数を渡すときは、定義時に命名した名称と一致させること。  
+   同一処理に複数名が使用されることにより可読性が下がることを防ぐため。  
+   子コンポーネントで既に親コンポーネントで定義済みのパラメータ・関数名で命名したいなど、やむを得ず親から渡す際に名称を変更する場合はコメントで変更理由を記載する。
+
+良い例（`handleCloseCreateDrawer`が一致）:
+
+```tsx
+<CreateDrawer handleCloseCreateDrawer={handleCloseCreateDrawer} />
+```
+
+悪い例（`handleCloseCreateDrawer`と`handleCloseDrawer`が不一致）:
+
+```tsx
+<CreateDrawer handleCloseCreateDrawer={handleCloseDrawer} />
+```
+
+## CSSに関して
+
+1. スタイルは`sx`に直接記載できるのは3つまでとし、4つ以上の場合は`styles`に定義して使用する。  
+   `sx`記載でCSS整理工数を削減しつつ、記載量制限でJSX可読性低下を防ぐため。  
+   スタイルが3つを超えない場合でも`styles`に定義してよい。
+
+良い例1（`sx`に3つまで）:
+
+```tsx
+<Box sx={{ height: 44, minWidth: 20, ml: 3 }} />
+```
+
+良い例2（`styles`に定義）:
+
+```tsx
+<Box sx={styles.searchBarContainer} />
+```
+
+悪い例（`sx`が4つ以上）:
+
+```tsx
+<Box sx={{ height: 44, minWidth: 20, ml: 3, mb: 5 }} />
+```
+
+2. Propsにスタイルを記載することは禁止。  
+   CSS整理が複雑化し、JSX可読性が下がることを防ぐため。  
+   ただし`Box`コンポーネントはラップコンポーネントのため、Propsでのスタイル記載を許可する。
+
+良い例1（Propsにスタイルを記載しない）:
+
+```tsx
+<Button variant="contained" color="primary" sx={{ ml: 3 }} />
+```
+
+良い例2（`Box`のPropsにスタイルを記載）:
+
+```tsx
+<Box display="flex" alignItems="center" />
+```
+
+悪い例（Propsに`align="center"`を指定）:
+
+```tsx
+<Button variant="contained" color="primary" align="center" sx={{ ml: 3 }} />
+```
+
+3. スタイルで数値を指定する場合は単位を省略する。  
+   より簡潔にするため。  
+   複数値指定時など単位省略不可の場合は`px`指定可。
+
+良い例1（数値のみ）:
+
+```ts
+width: 500
+```
+
+良い例2（複数値のため単位指定）:
+
+```ts
+boxShadow: '0px 3px 3px #D9D9D9'
+```
+
+悪い例:
+
+```ts
+width: 500px
+```
+
+4. margin・paddingはMUIの書き方に従う。  
+   コードを簡潔にするため。  
+   参考: https://mui.com/system/getting-started/the-sx-prop/#spacing
+
+良い例:
+
+```ts
+mx: 4
+```
+
+悪い例:
+
+```ts
+marginLeft: '16px'
+marginRight: '16px'
+```
+
+5. テーブルヘッダーのサイズ指定は「カラム幅 + 右余白の幅」の形式で指定する。  
+   指定間違い削減と可読性向上のため。
+
+良い例:
+
+```ts
+const tableHeadData = [
+  [{ sortKey: 'code', label: 'コード', size: 56 + 40 }],
+  ...
+]
+```
+
+悪い例:
+
+```ts
+const tableHeadData = [
+  [{ sortKey: 'code', label: 'コード', size: 96 }],
+  ...
+]
+```
+
+6. カラーコードはXDと同様の値で指定する。  
+   表記ゆれ防止・可読性向上のため。
+
+良い例（6桁固定・大文字）:
+
+```ts
+color: '#038C93'
+```
+
+悪い例:
+
+```ts
+color: '#038c93'
+color: '#fff'
+rgb(255,0,0)
+```
+
+## JSXに関して
+
+1. スペースを書くときは空白文字を使用すること。  
+   SEO対策観点で推奨されていないため。
+
+良い例（空白文字使用）:
+
+```text
+&nbsp;
+&emsp;
+```
+
+悪い例（スペースキー入力）:
+
+```text
+␣
+```
+
+## カスタムフックに関して
+
+1. カスタムフックを使用すること。  
+   同一処理の重複記載や不統一を防ぐため。可読性向上のため。
+
+良い例:
+
+```ts
+const [isDrawerOpen, openDrawer, closeDrawer] = useBoolean()
+```
+
+悪い例:
+
+```ts
+const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true)
+```
+
+補足:
+- hooksの使用方法に関しては別途wikiに記載
+- 記載したらリンクをはる

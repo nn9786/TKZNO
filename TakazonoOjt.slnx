@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Takazono.Ojt.WebApi/Takazono.Ojt.WebApi.csproj" />
+  </Folder>
+</Solution>

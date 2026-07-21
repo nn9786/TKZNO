@@ -1,0 +1,45 @@
+code,jp,en
+T0001,マスタメニュー,Master Menu
+T0002,単位マスタ,Unit Master
+T0003,店舗マスタ,Store Master
+T0004,ログアウト,Log out
+T0005,言語,Language
+T0006,ログイン,Login
+T0007,ユーザー名,User Name
+T0008,パスワード,Password
+T0009,コード,Code
+T0010,名称,Name
+T0011,使用区分,Use Status
+T0012,表示順,Display Order
+T0013,郵便番号,Postal Code
+T0014,住所,Address
+T0015,電話番号,Phone Number
+T0016,キーワード,Keyword
+T0017,使用中止も表示,Show discontinued too
+T0018,データがありません。,No data.
+T0019,ユーザー名またはパスワードが正しくありません。,Invalid user name or password.
+T0020,TakazonoOJT 学習教材,TakazonoOJT Training
+T0021,ダッシュボード,Dashboard
+T0022,メニュー,Menu
+T0023,学習メニュー,Learning Menu
+T0024,将来拡張エリア,Future Expansion Area
+T0025,マスタ管理,Master Management
+T0026,実装済み機能,Implemented Features
+T0027,今日のフォーカス,Today's Focus
+T0028,機能を選択してください。,Please choose a feature.
+T0029,スタートページ,Start Page
+T0030,店舗コード,Store Code
+T0031,店舗名称,Store Name
+T0032,単位コード,Unit Code
+T0033,単位名称,Unit Name
+T0034,例）{value},e.g. {value}
+T0035,検索キーワードを入力してください,Enter search keywords.
+T0036,ユーザー名を入力してください,Enter user name.
+T0037,パスワードを入力してください,Enter password.
+T0038,00000000,00000000
+T0039,錠,tablet
+T0040,0001,0001
+T0041,本店,Head Office
+T0042,1000001,1000001
+T0043,東京都千代田区丸の内1-1-1,1-1-1 Marunouchi Chiyoda-ku Tokyo
+T0044,03-1234-5678,03-1234-5678

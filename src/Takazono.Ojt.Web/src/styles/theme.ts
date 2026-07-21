@@ -1,0 +1,57 @@
+import { createTheme } from '@mui/material/styles'
+
+export const appColors = {
+  primaryMain: '#2f5d8a',
+  secondaryMain: '#2f7a68',
+  appBackground: '#f1f5f8',
+  white: '#FFFFFF',
+  headerBarBg: 'rgba(255,255,255,0.88)',
+  headerText: '#193247',
+  headerBorder: '#D6E4F1',
+  userChipBg: '#EDF5FC',
+  userChipText: '#24435D',
+  sideNavBorder: '#CDDDEB',
+  sideNavHeaderText: '#35526B',
+  loadingOverlay: 'rgba(255,255,255,0.5)',
+  navActiveText: '#0F4F86',
+  navText: '#2F475D',
+  navActiveBg: '#DFF0FF',
+  navActiveBorder: '#9CC8ED',
+  navHoverActiveBg: '#D7ECFF',
+  navHoverBg: '#F3F8FD',
+  navHoverBorder: '#D9E7F4',
+  dashboardCardText: '#13212D',
+  dashboardCardBackground: 'linear-gradient(135deg, #D2ECFF 0%, #E8F7FF 40%, #F7FBFF 100%)',
+  dashboardCardBorder: '#C7E0F5',
+  dashboardHeroCircleBg: 'rgba(73, 134, 191, 0.16)',
+  masterHeroBorder: '#CADDEE',
+  masterHeroBackground: 'linear-gradient(120deg, #DBECFF 0%, #EDF6FF 55%, #F8FBFF 100%)',
+  masterHeroCircleBg: 'rgba(87, 151, 211, 0.18)',
+  masterHeroTitle: '#1A3146',
+  masterCardTitle: '#2F4E69',
+  masterCardCaption: '#456179',
+  masterCardShadow: '0 12px 24px rgba(18, 52, 82, 0.15)',
+  masterUnitTone: 'linear-gradient(145deg, #e4f7f1 0%, #f4fff8 100%)',
+  masterUnitBorder: '#bfe8d7',
+  masterStoreTone: 'linear-gradient(145deg, #e8f0ff 0%, #f4f8ff 100%)',
+  masterStoreBorder: '#c5d6ff',
+  appBackgroundEffect:
+    'radial-gradient(circle at 10% -5%, rgba(177,220,255,0.45) 0%, rgba(177,220,255,0) 45%), radial-gradient(circle at 95% 10%, rgba(133,192,246,0.2) 0%, rgba(133,192,246,0) 40%)',
+} as const
+
+export const theme = createTheme({
+  palette: {
+    primary: { main: appColors.primaryMain },
+    secondary: { main: appColors.secondaryMain },
+    background: { default: appColors.appBackground },
+  },
+  typography: {
+    fontFamily: '"M PLUS 1p", "Noto Sans JP", sans-serif',
+    fontSize: 14,
+    h5: { fontWeight: 700 },
+    h6: { fontWeight: 700 },
+  },
+  shape: {
+    borderRadius: 10,
+  },
+})

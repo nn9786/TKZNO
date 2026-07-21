@@ -1,0 +1,3 @@
+code,jp,en
+V0001,必須項目です。,This field is required.
+V0002,{max}文字以内で入力してください。,Please enter within {max} characters.

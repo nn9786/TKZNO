@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using TakazonoOjt.Api.Common;
-using TakazonoOjt.Api.Data;
-using TakazonoOjt.Api.Dtos.Unit;
+using Takazono.Ojt.WebApi.Common;
+using Takazono.Ojt.WebApi.Data;
+using Takazono.Ojt.WebApi.Dtos.Unit;
 
-namespace TakazonoOjt.Api.Services;
+namespace Takazono.Ojt.WebApi.Services;
 
 public class UnitService(AppDbContext db) : IUnitService
 {

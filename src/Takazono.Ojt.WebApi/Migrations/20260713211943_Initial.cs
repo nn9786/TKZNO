@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TakazonoOjt.Api.Migrations
+namespace Takazono.Ojt.WebApi.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration

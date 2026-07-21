@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TakazonoOjt.Api.Common;
-using TakazonoOjt.Api.Dtos.Unit;
-using TakazonoOjt.Api.Services;
+using Takazono.Ojt.WebApi.Common;
+using Takazono.Ojt.WebApi.Dtos.Unit;
+using Takazono.Ojt.WebApi.Services;
 
-namespace TakazonoOjt.Api.Controllers;
+namespace Takazono.Ojt.WebApi.Controllers;
 
 [ApiController]
 [Authorize]

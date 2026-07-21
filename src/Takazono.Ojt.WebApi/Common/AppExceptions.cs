@@ -1,4 +1,4 @@
-namespace TakazonoOjt.Api.Common;
+namespace Takazono.Ojt.WebApi.Common;
 
 /// <summary>Entity looked up by Sid does not exist (or is not visible to the caller).</summary>
 public class NotFoundAppException(string message) : Exception(message);

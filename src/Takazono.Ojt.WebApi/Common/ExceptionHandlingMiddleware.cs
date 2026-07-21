@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace TakazonoOjt.Api.Common;
+namespace Takazono.Ojt.WebApi.Common;
 
 /// <summary>
 /// Converts exceptions to ProblemDetails responses. Unhandled exceptions are logged with full

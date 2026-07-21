@@ -1,6 +1,6 @@
-using TakazonoOjt.Api.Common;
+using Takazono.Ojt.WebApi.Common;
 
-namespace TakazonoOjt.Api.Entities;
+namespace Takazono.Ojt.WebApi.Entities;
 
 /// <summary>単位マスタ（個/箱/ケース等）— roadmap master #1, the simplest lookup master.</summary>
 public class Unit : BaseEntity

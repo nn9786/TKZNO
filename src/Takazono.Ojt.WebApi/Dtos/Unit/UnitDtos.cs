@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TakazonoOjt.Api.Dtos.Unit;
+namespace Takazono.Ojt.WebApi.Dtos.Unit;
 
 public class UnitDto
 {

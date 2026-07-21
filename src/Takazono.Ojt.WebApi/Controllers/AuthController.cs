@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TakazonoOjt.Api.Auth;
-using TakazonoOjt.Api.Data;
-using TakazonoOjt.Api.Dtos.Auth;
-using TakazonoOjt.Api.Entities;
+using Takazono.Ojt.WebApi.Auth;
+using Takazono.Ojt.WebApi.Data;
+using Takazono.Ojt.WebApi.Dtos.Auth;
+using Takazono.Ojt.WebApi.Entities;
 
-namespace TakazonoOjt.Api.Controllers;
+namespace Takazono.Ojt.WebApi.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]/[action]")]

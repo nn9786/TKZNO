@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using TakazonoOjt.Api.Entities;
+using Takazono.Ojt.WebApi.Entities;
 
-namespace TakazonoOjt.Api.Data.Seed;
+namespace Takazono.Ojt.WebApi.Data.Seed;
 
 /// <summary>
 /// Minimal development sample data. Idempotent (only inserts when a table is empty) so it never

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TakazonoOjt.Api.Dtos.Auth;
+namespace Takazono.Ojt.WebApi.Dtos.Auth;
 
 public class LoginRequest
 {

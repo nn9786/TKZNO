@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using TakazonoOjt.Api.Auth;
-using TakazonoOjt.Api.Common;
-using TakazonoOjt.Api.Data;
-using TakazonoOjt.Api.Data.Seed;
-using TakazonoOjt.Api.Services;
+using Takazono.Ojt.WebApi.Auth;
+using Takazono.Ojt.WebApi.Common;
+using Takazono.Ojt.WebApi.Data;
+using Takazono.Ojt.WebApi.Data.Seed;
+using Takazono.Ojt.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +16,7 @@ const string DevCorsPolicy = "DevCors";
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TakazonoOjtDbConnection")));
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.AddSingleton<JwtTokenService>();
@@ -56,7 +56,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "TakazonoOjt API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Takazono.Ojt API", Version = "v1" });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

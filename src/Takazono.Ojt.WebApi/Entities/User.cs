@@ -1,6 +1,6 @@
-using TakazonoOjt.Api.Common;
+using Takazono.Ojt.WebApi.Common;
 
-namespace TakazonoOjt.Api.Entities;
+namespace Takazono.Ojt.WebApi.Entities;
 
 public class User : BaseEntity
 {

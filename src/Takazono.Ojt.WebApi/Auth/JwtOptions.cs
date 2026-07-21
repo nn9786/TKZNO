@@ -1,4 +1,4 @@
-namespace TakazonoOjt.Api.Auth;
+namespace Takazono.Ojt.WebApi.Auth;
 
 public class JwtOptions
 {

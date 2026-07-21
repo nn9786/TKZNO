@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TakazonoOjt.Api.Common;
-using TakazonoOjt.Api.Entities;
+using Takazono.Ojt.WebApi.Common;
+using Takazono.Ojt.WebApi.Entities;
 
-namespace TakazonoOjt.Api.Data;
+namespace Takazono.Ojt.WebApi.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

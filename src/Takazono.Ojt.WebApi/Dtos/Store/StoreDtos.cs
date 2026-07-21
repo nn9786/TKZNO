@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TakazonoOjt.Api.Dtos.Store;
+namespace Takazono.Ojt.WebApi.Dtos.Store;
 
 public class StoreDto
 {

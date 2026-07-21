@@ -3,9 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using TakazonoOjt.Api.Entities;
+using Takazono.Ojt.WebApi.Entities;
 
-namespace TakazonoOjt.Api.Auth;
+namespace Takazono.Ojt.WebApi.Auth;
 
 public class JwtTokenService(IOptions<JwtOptions> jwtOptions)
 {

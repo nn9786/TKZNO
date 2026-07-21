@@ -1,6 +1,6 @@
-using TakazonoOjt.Api.Common;
+using Takazono.Ojt.WebApi.Common;
 
-namespace TakazonoOjt.Api.Entities;
+namespace Takazono.Ojt.WebApi.Entities;
 
 /// <summary>店舗マスタ — roadmap master #3, the "手本"（reference implementation）master.</summary>
 public class Store : BaseEntity

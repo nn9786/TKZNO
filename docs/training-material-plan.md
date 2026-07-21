@@ -163,7 +163,7 @@ interfaces/storeApi.ts                                  # リクエスト/レス
 クリーンアーキテクチャの多層・マルチリポジトリは廃止し、**Controller → Service → EF Core** の薄い3層に統合する。エンティティ数が14と多いため、レイヤー別フォルダを基本としつつ、DTOなど1エンティティあたり複数ファイルになるものだけエンティティ名でサブフォルダ化する（レイヤー内が肥大化しすぎるのを防ぐハイブリッド構成）。
 
 ```
-TakazonoOjt.Api/
+Takazono.Ojt.WebApi/
   Controllers/
     StoreController.cs
     ProductController.cs
@@ -348,16 +348,16 @@ Takazono.Oliveと同様、**FE(Web)/BE(WebApi)を単一のGitリポジトリに�
 
 ```
 takazono-ojt/                      # リポジトリルート（GitHub個人リポジトリ）
-  TakazonoOjt.sln                  # .NETプロジェクトのみを束ねる
+  Takazono.Ojt.slnx                  # .NETプロジェクトのみを束ねる
   src/
-    TakazonoOjt.Web/                # フロントエンド（npmプロジェクト、§2.2のディレクトリ構成）
-    TakazonoOjt.Api/                # バックエンド（§2.4のディレクトリ構成）
+    Takazono.Ojt.Web/                # フロントエンド（npmプロジェクト、§2.2のディレクトリ構成）
+    Takazono.Ojt.WebApi/             # バックエンド（§2.4のディレクトリ構成）
   docs/                             # 教材本文（§2.11）
   .github/workflows/ci.yml         # §2.7
   README.md
 ```
 
-製品名は **「TakazonoOjt」** で確定（リポジトリ名は慣例に合わせてケバブケース `takazono-ojt`、ソリューション/プロジェクト名・namespaceは `TakazonoOjt.Web`/`TakazonoOjt.Api`）。
+製品名は **「Takazono.Ojt」** で確定（リポジトリ名は慣例に合わせてケバブケース `takazono-ojt`、ソリューション/プロジェクト名・namespaceは `Takazono.Ojt.Web`/`Takazono.Ojt.WebApi`）。
 
 マルチプロジェクト・Git submodule構成（`_libs/takazono.core`相当）は導入しない（§2.4で述べた通り単一プロジェクトに統合済みのため、そもそも分割する動機がない）。
 
@@ -538,7 +538,7 @@ takazono-ojt/                      # リポジトリルート（GitHub個人リ�
 | N | 開発時ポート・CORS | **訂正**: 当初`4000`/`40001`としたが、`40001`はPhysalisが実際に予約している値だったと判明（launchSettings.jsonだけでなくフロントのハードコード値・CSPまで再調査して発覚）。**フロント`http://localhost:4210`／バックエンド`http://localhost:4211`**に変更し、実装済みコードも修正済み。CORSはこのオリジンのみ許可（§2.12） |
 | O | EF Coreマイグレーション適用 | 手動（`dotnet ef database update`）で確定。自動`Database.Migrate()`は使わない |
 | P | パッケージマネージャ | npmで固定（yarn/pnpmは不使用） |
-| Q | 教材内の製品名 | **「TakazonoOjt」**で確定。リポジトリ名`takazono-ojt`、プロジェクト/namespace `TakazonoOjt.Web`/`TakazonoOjt.Api`（§2.10） |
+| Q | 教材内の製品名 | **「Takazono.Ojt」**で確定。リポジトリ名`takazono-ojt`、プロジェクト/namespace `Takazono.Ojt.Web`/`Takazono.Ojt.WebApi`（§2.10） |
 | R | Swagger UIでのJWT認証テスト | 設ける。`AddSecurityDefinition`/`AddSecurityRequirement`でBearer認証を構成し、Login→Authorizeボタンにトークン貼り付け、という導線を用意（§2.4） |
 | S | フロント/バックエンド同時起動 | 2ターミナルで個別起動する運用でよい。`concurrently`等の一本化は行わない（§2.12） |
 | T | Zodバリデーションメッセージのi18n統合 | `getLabel`ベースのスキーマ生成フック（`useXxxSchema()`、`ValidationLabel.csv`新設）で統合する方式を新規提案（§2.13） |

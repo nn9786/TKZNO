@@ -1,4 +1,4 @@
-namespace TakazonoOjt.Api.Common;
+namespace Takazono.Ojt.WebApi.Common;
 
 public class PagedResult<T>
 {

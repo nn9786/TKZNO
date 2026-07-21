@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using TakazonoOjt.Api.Common;
-using TakazonoOjt.Api.Data;
-using TakazonoOjt.Api.Dtos.Store;
+using Takazono.Ojt.WebApi.Common;
+using Takazono.Ojt.WebApi.Data;
+using Takazono.Ojt.WebApi.Dtos.Store;
 
-namespace TakazonoOjt.Api.Services;
+namespace Takazono.Ojt.WebApi.Services;
 
 public class StoreService(AppDbContext db) : IStoreService
 {

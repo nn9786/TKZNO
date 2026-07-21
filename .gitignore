@@ -1,9 +1,7 @@
 ################################################################################
-# Reference projects (local only — do not publish)
+# Reference projects (local only - do not publish)
 ################################################################################
-/takazono.core/
-/takazono.olive/
-/takazono.physalis/
+/references/
 
 ################################################################################
 # .NET / Visual Studio

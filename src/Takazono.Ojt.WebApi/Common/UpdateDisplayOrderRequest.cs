@@ -1,4 +1,4 @@
-namespace TakazonoOjt.Api.Common;
+namespace Takazono.Ojt.WebApi.Common;
 
 /// <summary>Shared shape for the "UpdateDisplayOrder" action every reorderable master exposes.</summary>
 public class UpdateDisplayOrderRequest

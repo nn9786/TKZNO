@@ -1,3 +1,11 @@
 code,jp,en
 V0001,必須項目です。,This field is required.
 V0002,{max}文字以内で入力してください。,Please enter within {max} characters.
+V0003,半角英数記号で入力してください。,Please enter using half-width alphanumeric characters and symbols.
+V0004,{min}文字以上で入力してください。,Please enter at least {min} characters.
+V0005,パスワードと確認用パスワードが一致しません。,Passwords do not match.
+V0006,{min}以上{max}以下で入力してください。,Please enter a value between {min} and {max}.
+V0007,法人の場合は必須です。,Required when type is Corporate.
+V0008,優良の場合は必須です。,Required when rank is Premium.
+V0009,終了日は開始日以降にしてください。,The end date must be on or after the start date.
+V0010,0以上で入力してください。,Please enter a value of 0 or greater.

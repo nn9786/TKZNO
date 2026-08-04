@@ -39,7 +39,7 @@ export const useLocalizationLabels = () => {
       if (!vars) return raw
       return Object.entries(vars).reduce((msg, [key, value]) => msg.replaceAll(`{${key}}`, value), raw)
     },
-    [language],
+    [language]
   )
 
   return { getLabel, language }

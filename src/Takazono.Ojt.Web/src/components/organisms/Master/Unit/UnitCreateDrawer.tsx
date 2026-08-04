@@ -1,11 +1,13 @@
+// 単位情報新規登録ドロワー
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import { Box, Button, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
 import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
 import { useApi } from '@/hooks/useApi'
+import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
-import { useUnitSchema, type UnitFormValues } from '@/hooks/useUnitSchema'
+import { type UnitFormValues, useUnitSchema } from '@/hooks/useUnitSchema'
 import { createUnit } from '@/services/unitApi'
 
 const styles = {
@@ -45,21 +47,23 @@ type Props = {
   onCreated: () => void
 }
 
-export const UnitCreateDialog = ({ open, onClose, onCreated }: Props) => {
+export const UnitCreateDrawer = ({ open, onClose, onCreated }: Props) => {
   const { getLabel } = useLocalizationLabels()
   const { api } = useApi()
+  const { displayValidationError } = useDisplayValidationError()
   const schema = useUnitSchema()
 
+  const form = useForm<UnitFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { code: '', name: '', useFlag: true },
+  })
   const {
     register,
     handleSubmit,
     reset,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<UnitFormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { code: '', name: '', useFlag: true },
-  })
+  } = form
 
   const onSubmit = handleSubmit(async (values) => {
     await api(() => createUnit(values), {
@@ -68,11 +72,20 @@ export const UnitCreateDialog = ({ open, onClose, onCreated }: Props) => {
         reset()
         onCreated()
       },
+      onError: (err) => displayValidationError(err, form),
     })
   })
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: styles.drawerPaper } }}>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      slotProps={{
+        paper: { sx: styles.drawerPaper },
+        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="code"]')?.focus() },
+      }}
+    >
       <Box sx={styles.drawerBody}>
         <Stack direction="row" spacing={2} sx={styles.header}>
           <Typography variant="h6">{getLabel('B0002') /* 新規登録 */}</Typography>
@@ -89,14 +102,14 @@ export const UnitCreateDialog = ({ open, onClose, onCreated }: Props) => {
             placeholder={getLabel('T0034', { value: getLabel('T0038') /* 00000000 */ }) /* 例）{value} */}
             {...register('code')}
             error={!!errors.code}
-            helperText={errors.code?.message}
+            helperText={errors.code?.message ?? getLabel('T0050') /* *必須 */}
           />
           <TextField
             label={getLabel('T0033') /* 単位名称 */}
             placeholder={getLabel('T0034', { value: getLabel('T0039') /* 錠 */ }) /* 例）{value} */}
             {...register('name')}
             error={!!errors.name}
-            helperText={errors.name?.message}
+            helperText={errors.name?.message ?? getLabel('T0050') /* *必須 */}
           />
           <ReactHookFormSwitch control={control} name="useFlag" label={getLabel('T0011') /* 使用区分 */} />
         </Stack>

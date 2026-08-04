@@ -1,3 +1,4 @@
+// ダッシュボード画面
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded'
 
 import { Box, Paper, Stack, Typography } from '@/components/atoms/Mui'

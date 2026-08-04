@@ -4,3 +4,6 @@ M0002,更新しました。,Updated successfully.
 M0003,削除しました。,Deleted successfully.
 M0004,削除してよろしいですか？,Are you sure you want to delete this?
 M0005,予期しないエラーが発生しました。,An unexpected error occurred.
+M0006,セッションの有効期限が切れました。再度ログインしてください。,Your session has expired. Please log in again.
+M0007,画面の呼び出しに誤りがあります。,There was an error opening this screen.
+M0008,パスワードを再設定しました。,Password reset successfully.

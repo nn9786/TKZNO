@@ -1,0 +1,209 @@
+// ユーザー情報一覧画面
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { UserDto } from '@/api/@types'
+import { Box, Button, Checkbox, FormControlLabel, Stack, TextField, Typography } from '@/components/atoms/Mui'
+import { Breadcrumbs } from '@/components/molecules/Common/Breadcrumbs'
+import type { SortDirection } from '@/components/molecules/Common/SortableTableHeaderCell'
+import { UserCreateDrawer, UserEditDrawer, UserListTable } from '@/components/organisms/Master/User'
+import { Base } from '@/components/templates/Base'
+import { ROUTE } from '@/constants/route'
+import { useApi } from '@/hooks/useApi'
+import { useBoolean } from '@/hooks/useBoolean'
+import { useErrorDialog } from '@/hooks/useErrorDialog'
+import { useKengen } from '@/hooks/useKengen'
+import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
+import { useSystemError } from '@/hooks/useSystemError'
+import { downloadUsersCsv, getUser, searchUsers } from '@/services/userApi'
+import { downloadFile } from '@/utils/downloadFile'
+import { handleDrawerFocus } from '@/utils/handleDrawerFocus'
+
+const styles = {
+  title: {
+    mb: 2,
+  },
+  toolbar: {
+    mb: 2,
+    alignItems: 'center',
+  },
+  spacer: {
+    flexGrow: 1,
+  },
+}
+
+const DEFAULT_PAGE_SIZE = 20
+const DEFAULT_SORT_KEY = 'userName'
+
+type SearchOverrides = {
+  pageNumber?: number
+  pageSize?: number
+  sortKey?: string
+  sortDirection?: SortDirection
+}
+
+export const User = () => {
+  const { getLabel, language } = useLocalizationLabels()
+  const { api } = useApi()
+  const { can } = useKengen()
+  const { showError } = useErrorDialog()
+  const { displayParameterSystemError } = useSystemError()
+
+  const [keyword, setKeyword] = useState('')
+  const [userName, setUserName] = useState('')
+  const [includeInactive, setIncludeInactive] = useState(false)
+  const [items, setItems] = useState<UserDto[]>([])
+  const [pageNumber, setPageNumber] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [sortKey, setSortKey] = useState(DEFAULT_SORT_KEY)
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [createOpen, openCreate, closeCreate] = useBoolean()
+  const [editing, setEditing] = useState<UserDto | null>(null)
+  const focusTargetRef = useRef<HTMLButtonElement>(null)
+
+  const search = useCallback(
+    async (overrides?: SearchOverrides) => {
+      await api(
+        () =>
+          searchUsers({
+            keyword,
+            userName,
+            includeInactive,
+            pageNumber: overrides?.pageNumber ?? pageNumber,
+            pageSize: overrides?.pageSize ?? pageSize,
+            sortKey: overrides?.sortKey ?? sortKey,
+            sortDirection: overrides?.sortDirection ?? sortDirection,
+          }),
+        {
+          onSuccess: (res) => {
+            setItems(res.items ?? [])
+            setPageNumber(res.pageNumber ?? 1)
+            setPageSize(res.pageSize ?? DEFAULT_PAGE_SIZE)
+            setTotalCount(res.totalCount ?? 0)
+            setTotalPages(res.totalPages ?? 0)
+            setSortKey(res.sortKey ?? DEFAULT_SORT_KEY)
+            setSortDirection(res.sortDirection === 'desc' ? 'desc' : 'asc')
+          },
+        }
+      )
+    },
+    [api, keyword, userName, includeInactive, pageNumber, pageSize, sortKey, sortDirection]
+  )
+
+  useEffect(() => {
+    void search()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /**
+   * 一覧のキャッシュ済みデータをそのまま編集対象にせず、クリック時点の最新値を取得し直す
+   * （他ユーザーの更新後に古いデータで編集してしまうのを防ぐ、Takazono.Oliveの`handleOpenEditDrawer`相当）。
+   */
+  const handleRowClick = async (item: UserDto) => {
+    if (item.sid === undefined) {
+      displayParameterSystemError()
+      return
+    }
+    await api(() => getUser(item.sid!), {
+      onSuccess: setEditing,
+      onError: showError,
+    })
+  }
+
+  const handleAfterMutation = () => {
+    closeCreate()
+    setEditing(null)
+    void search()
+  }
+
+  const handleSort = (nextSortKey: string, nextSortDirection: SortDirection) => {
+    void search({ pageNumber: 1, sortKey: nextSortKey, sortDirection: nextSortDirection })
+  }
+
+  const handlePaginationChange = (nextPageNumber: number, nextPageSize: number) => {
+    void search({ pageNumber: nextPageNumber, pageSize: nextPageSize })
+  }
+
+  const handleDownloadCsv = async () => {
+    await api(() => downloadUsersCsv(language), {
+      onSuccess: (blob) => downloadFile(blob, 'user.csv'),
+    })
+  }
+
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    void search({ pageNumber: 1 })
+  }
+
+  const drawerStates = useMemo(() => [createOpen, editing !== null], [createOpen, editing])
+
+  useEffect(() => {
+    handleDrawerFocus(drawerStates, focusTargetRef)
+  }, [drawerStates])
+
+  return (
+    <Base>
+      <Breadcrumbs
+        links={[
+          { label: getLabel('T0001') /* マスタメニュー */, to: ROUTE.MASTER_MENU },
+          { label: getLabel('T0059') /* ユーザーマスタ */ },
+        ]}
+      />
+      <Typography variant="h5" sx={styles.title}>
+        {getLabel('T0059') /* ユーザーマスタ */}
+      </Typography>
+
+      <Box component="form" onSubmit={handleSearchSubmit}>
+        <Stack direction="row" spacing={2} sx={styles.toolbar}>
+          <TextField
+            size="small"
+            label={getLabel('T0016') /* キーワード */}
+            placeholder={getLabel('T0035') /* 検索キーワードを入力してください */}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <TextField
+            size="small"
+            label={getLabel('T0060') /* ログインID */}
+            placeholder={getLabel('T0058') /* 完全一致 */}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={includeInactive} onChange={(e) => setIncludeInactive(e.target.checked)} />}
+            label={getLabel('T0017') /* 使用中止も表示 */}
+          />
+          <Button type="submit" variant="outlined">
+            {getLabel('B0001') /* 検索 */}
+          </Button>
+          <Box sx={styles.spacer} />
+          <Button type="button" variant="outlined" ref={focusTargetRef} onClick={() => void handleDownloadCsv()}>
+            {getLabel('B0008') /* CSV出力 */}
+          </Button>
+          {can('create') && (
+            <Button type="button" variant="contained" onClick={openCreate}>
+              {getLabel('B0002') /* 新規登録 */}
+            </Button>
+          )}
+        </Stack>
+      </Box>
+
+      <UserListTable
+        items={items}
+        pageNumber={pageNumber}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        totalPages={totalPages}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        onRowClick={(item) => void handleRowClick(item)}
+        onSort={handleSort}
+        onPaginationChange={handlePaginationChange}
+      />
+
+      <UserCreateDrawer open={createOpen} onClose={closeCreate} onCreated={handleAfterMutation} />
+      <UserEditDrawer user={editing} onClose={() => setEditing(null)} onSaved={handleAfterMutation} />
+    </Base>
+  )
+}

@@ -1,18 +1,21 @@
 /* eslint-disable */
-import type { DefineMethods } from 'aspida';
-import type * as Types from '../../../../@types';
+import type { DefineMethods } from 'aspida'
+import type * as Types from '../../../../@types'
 
 export type Methods = DefineMethods<{
   get: {
-    query?: {
-      Keyword?: string | undefined;
-      IncludeInactive?: boolean | undefined;
-      PageNumber?: number | undefined;
-      PageSize?: number | undefined;
-    } | undefined;
+    query?:
+      | {
+          IncludeInactive?: boolean | undefined
+          PageNumber?: number | undefined
+          PageSize?: number | undefined
+          SortKey?: string | undefined
+          SortDirection?: string | undefined
+        }
+      | undefined
 
-    status: 200;
+    status: 200
     /** OK */
-    resBody: Types.UnitDtoPagedResult;
-  };
-}>;
+    resBody: Types.UnitDtoPagedResult
+  }
+}>

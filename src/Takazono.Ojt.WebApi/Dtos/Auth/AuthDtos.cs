@@ -14,7 +14,9 @@ public class LoginRequest
 public class LoginResponse
 {
     public string Token { get; init; } = string.Empty;
+    public long Sid { get; init; }
     public string UserName { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
     public string Role { get; init; } = string.Empty;
     public DateTime ExpiresAtUtc { get; init; }
 }

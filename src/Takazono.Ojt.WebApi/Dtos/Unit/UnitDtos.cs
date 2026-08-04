@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Takazono.Ojt.WebApi.Common;
 
 namespace Takazono.Ojt.WebApi.Dtos.Unit;
 
@@ -9,15 +10,24 @@ public class UnitDto
     public string Name { get; init; } = string.Empty;
     public bool UseFlag { get; init; }
     public int DisplayOrderNumber { get; init; }
+
+    /// <summary>True for the small set of seeded base units that may not be deactivated or deleted (see <see cref="Entities.Unit.UnDeleteFlag"/>).</summary>
+    public bool UnDeleteFlag { get; init; }
+
     public string Version { get; init; } = string.Empty;
+    public DateTime CreatedDateTime { get; init; }
+    public string CreatedName { get; init; } = string.Empty;
+    public DateTime ModifiedDateTime { get; init; }
+    public string ModifiedName { get; init; } = string.Empty;
 }
 
 public class SearchUnitRequest
 {
-    public string? Keyword { get; init; }
     public bool IncludeInactive { get; init; }
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+    public string? SortKey { get; init; }
+    public string SortDirection { get; init; } = SortDirections.Ascending;
 }
 
 public class CreateUnitRequest

@@ -1,13 +1,13 @@
-import { useState, type ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
+import HomeWorkRoundedIcon from '@mui/icons-material/HomeWorkRounded'
 import KeyboardDoubleArrowLeftRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 import KeyboardDoubleArrowRightRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowRightRounded'
-import HomeWorkRoundedIcon from '@mui/icons-material/HomeWorkRounded'
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
+import { type ReactNode, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Box, Button, CircularProgress, Paper, Stack, Typography } from '@/components/atoms/Mui'
+import { GlobalDialog } from '@/components/organisms/Common/GlobalDialog'
 import { Header } from '@/components/organisms/Common/Header'
 import { ROUTE } from '@/constants/route'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
@@ -17,6 +17,16 @@ import { appColors } from '@/styles/theme'
 type Props = {
   children: ReactNode
 }
+
+/** サイドメニューの開閉状態をlocalStorageに保存し、次回訪問時も引き継ぐ（Takazono.Oliveの`isMenuExtended`方式を踏襲）。 */
+const SIDE_MENU_STORAGE_KEY = 'ojt:isSideMenuOpen'
+
+/**
+ * ローディング表示までの遅延時間。検索等の速い通信では見た目のオーバーレイ（背景を暗くする＋スピナー表示）を出さず、
+ * 一定時間以上かかった通信だけ「読み込み中」と気づかせる（一瞬のちらつきを防ぐ）。
+ * ただし操作のブロック自体はローディング開始と同時に効かせ、待機中の二重操作を防ぐ。
+ */
+const LOADING_VISUAL_DELAY_MS = 150
 
 const styles = {
   root: {
@@ -66,13 +76,17 @@ const styles = {
   loadingOverlay: {
     position: 'fixed',
     inset: 0,
-    bgcolor: appColors.loadingOverlay,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2000,
   },
 }
+
+const getLoadingOverlayStyle = (visible: boolean) => ({
+  ...styles.loadingOverlay,
+  bgcolor: visible ? appColors.loadingOverlay : 'transparent',
+})
 
 const getNavButtonStyle = (active: boolean) => ({
   justifyContent: 'flex-start',
@@ -119,11 +133,38 @@ export const Base = ({ children }: Props) => {
   const location = useLocation()
   const { getLabel } = useLocalizationLabels()
   const loadingCount = useAppSelector((state) => state.ui.loadingCount)
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(true)
+  const isLoading = loadingCount > 0
+  const [showLoadingVisual, setShowLoadingVisual] = useState(false)
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(() => localStorage.getItem(SIDE_MENU_STORAGE_KEY) !== 'false')
+
+  useEffect(() => {
+    if (!isLoading) {
+      setShowLoadingVisual(false)
+      return
+    }
+    const timer = setTimeout(() => setShowLoadingVisual(true), LOADING_VISUAL_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [isLoading])
+
+  const handleToggleSideMenu = () => {
+    setIsSideMenuOpen((prev) => {
+      const next = !prev
+      localStorage.setItem(SIDE_MENU_STORAGE_KEY, String(next))
+      return next
+    })
+  }
 
   const navItems = [
-    { label: getLabel('T0021') /* ダッシュボード */, path: ROUTE.DASHBOARD, icon: <DashboardRoundedIcon fontSize="small" /> },
-    { label: getLabel('T0001') /* マスタメニュー */, path: ROUTE.MASTER_MENU, icon: <MenuBookRoundedIcon fontSize="small" /> },
+    {
+      label: getLabel('T0021') /* ダッシュボード */,
+      path: ROUTE.DASHBOARD,
+      icon: <DashboardRoundedIcon fontSize="small" />,
+    },
+    {
+      label: getLabel('T0001') /* マスタメニュー */,
+      path: ROUTE.MASTER_MENU,
+      icon: <MenuBookRoundedIcon fontSize="small" />,
+    },
   ]
 
   const isActive = (path: string) => {
@@ -145,8 +186,12 @@ export const Base = ({ children }: Props) => {
                 </Typography>
               )}
             </Stack>
-            <Button sx={getToggleButtonStyle(isSideMenuOpen)} onClick={() => setIsSideMenuOpen((prev) => !prev)}>
-              {isSideMenuOpen ? <KeyboardDoubleArrowLeftRoundedIcon fontSize="small" /> : <KeyboardDoubleArrowRightRoundedIcon fontSize="small" />}
+            <Button sx={getToggleButtonStyle(isSideMenuOpen)} onClick={handleToggleSideMenu}>
+              {isSideMenuOpen ? (
+                <KeyboardDoubleArrowLeftRoundedIcon fontSize="small" />
+              ) : (
+                <KeyboardDoubleArrowRightRoundedIcon fontSize="small" />
+              )}
             </Button>
           </Stack>
           <Stack spacing={1} sx={styles.menuList}>
@@ -169,11 +214,10 @@ export const Base = ({ children }: Props) => {
 
         <Box sx={styles.content}>{children}</Box>
       </Box>
-      {loadingCount > 0 && (
-        <Box sx={styles.loadingOverlay}>
-          <CircularProgress />
-        </Box>
+      {isLoading && (
+        <Box sx={getLoadingOverlayStyle(showLoadingVisual)}>{showLoadingVisual && <CircularProgress />}</Box>
       )}
+      <GlobalDialog />
     </Box>
   )
 }

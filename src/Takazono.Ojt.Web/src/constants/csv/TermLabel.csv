@@ -43,3 +43,57 @@ T0041,本店,Head Office
 T0042,1000001,1000001
 T0043,東京都千代田区丸の内1-1-1,1-1-1 Marunouchi Chiyoda-ku Tokyo
 T0044,03-1234-5678,03-1234-5678
+T0045,{from}-{to}件 / 全{total}件,{from}-{to} of {total}
+T0046,{size}件,{size}
+T0047,削除確認,Delete Confirmation
+T0048,表示順変更,Change Display Order
+T0049,ドラッグ&ドロップで並び替えできます。,Drag and drop rows to reorder them.
+T0050,*必須,* Required
+T0051,登録日時,Created At
+T0052,更新日時,Updated At
+T0053,更新者,Updated By
+T0054,削除不可,Protected
+T0055,更新の競合,Update Conflict
+T0056,このレコードは削除保護されているため、使用中止・削除ができません。,This record is protected and cannot be deactivated or deleted.
+T0057,エラー,Error
+T0058,完全一致,Exact match
+T0059,ユーザーマスタ,User Master
+T0060,ログインID,Login ID
+T0061,表示名,Display Name
+T0062,権限,Role
+T0063,管理者,Administrator
+T0064,一般,General
+T0065,確認用パスワード,Confirm Password
+T0066,taro01,taro01
+T0067,山田太郎,Taro Yamada
+T0068,パスワード再設定,Reset Password
+T0069,ログイン中の自分自身は使用中止・削除ができません。,You cannot deactivate or delete your own currently logged-in account.
+T0070,権限変更の確認,Confirm Role Change
+T0071,自分自身の権限を変更しようとしています。変更後は次回ログイン時から新しい権限が適用されます。続行しますか？,You are about to change your own role. The new role will take effect from your next login. Continue?
+T0072,表示言語,Display language
+T0073,表示件数,Items per page
+T0074,取引先マスタ,Supplier Master
+T0075,取引先コード,Supplier Code
+T0076,取引先名称,Supplier Name
+T0077,取引先区分,Supplier Type
+T0078,法人,Corporate
+T0079,個人,Individual
+T0080,法人番号,Corporate Number
+T0081,与信限度額,Credit Limit
+T0082,取引開始日,Transaction Start Date
+T0083,得意先マスタ,Customer Master
+T0084,得意先コード,Customer Code
+T0085,得意先名称,Customer Name
+T0086,得意先区分,Customer Rank
+T0087,一般,Standard
+T0088,優良,Premium
+T0089,新規,New
+T0090,優遇割引率(%),Preferential Discount Rate (%)
+T0091,契約開始日,Contract Start Date
+T0092,契約終了日,Contract End Date
+T0093,契約終了,Contract Ended
+T0094,T001,T001
+T0095,株式会社サンプル商事,Sample Trading Co. Ltd.
+T0096,1234567890123,1234567890123
+T0097,C001,C001
+T0098,サンプル商店,Sample Store

@@ -55,18 +55,14 @@ export const PasswordResetDialog = ({ open, sid, version, onClose, onDone, onCon
   })
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      slotProps={{
-        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="password"]')?.focus() },
-      }}
-    >
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle>{getLabel('T0068') /* パスワード再設定 */}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1, minWidth: 320 }}>
           <PasswordTextField
             label={getLabel('T0008') /* パスワード */}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
             {...register('password')}
             error={!!errors.password}
             helperText={errors.password?.message ?? getLabel('T0050') /* *必須 */}

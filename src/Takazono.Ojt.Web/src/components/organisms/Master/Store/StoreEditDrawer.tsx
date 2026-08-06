@@ -108,15 +108,7 @@ export const StoreEditDrawer = ({ store, onClose, onSaved }: Props) => {
   }
 
   return (
-    <Drawer
-      anchor="right"
-      open
-      onClose={onClose}
-      slotProps={{
-        paper: { sx: styles.drawerPaper },
-        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="code"]')?.focus() },
-      }}
-    >
+    <Drawer anchor="right" open onClose={onClose} slotProps={{ paper: { sx: styles.drawerPaper } }}>
       <Box sx={styles.drawerBody}>
         <Stack direction="row" spacing={2} sx={styles.header}>
           <Typography variant="h6">{getLabel('B0006') /* 編集 */}</Typography>
@@ -138,6 +130,8 @@ export const StoreEditDrawer = ({ store, onClose, onSaved }: Props) => {
           <TextField
             label={getLabel('T0030') /* 店舗コード */}
             placeholder={getLabel('T0034', { value: getLabel('T0040') /* 0001 */ }) /* 例）{value} */}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
             {...register('code')}
             error={!!errors.code}
             helperText={errors.code?.message ?? getLabel('T0050') /* *必須 */}

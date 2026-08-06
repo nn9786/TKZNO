@@ -77,17 +77,7 @@ export const StoreCreateDrawer = ({ open, onClose, onCreated }: Props) => {
   })
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      slotProps={{
-        paper: { sx: styles.drawerPaper },
-        // MUI自体のフォーカス管理(モーダルのルート要素へのフォーカス)より後に実行させるため、
-        // 遷移アニメーション完了後のonEnteredで最初の入力欄へフォーカスする。
-        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="code"]')?.focus() },
-      }}
-    >
+    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: styles.drawerPaper } }}>
       <Box sx={styles.drawerBody}>
         <Stack direction="row" spacing={2} sx={styles.header}>
           <Typography variant="h6">{getLabel('B0002') /* 新規登録 */}</Typography>
@@ -102,6 +92,8 @@ export const StoreCreateDrawer = ({ open, onClose, onCreated }: Props) => {
           <TextField
             label={getLabel('T0030') /* 店舗コード */}
             placeholder={getLabel('T0034', { value: getLabel('T0040') /* 0001 */ }) /* 例）{value} */}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
             {...register('code')}
             error={!!errors.code}
             helperText={errors.code?.message ?? getLabel('T0050') /* *必須 */}

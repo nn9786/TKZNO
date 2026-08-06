@@ -79,15 +79,7 @@ export const UserCreateDrawer = ({ open, onClose, onCreated }: Props) => {
   })
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      slotProps={{
-        paper: { sx: styles.drawerPaper },
-        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="userName"]')?.focus() },
-      }}
-    >
+    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: styles.drawerPaper } }}>
       <Box sx={styles.drawerBody}>
         <Stack direction="row" spacing={2} sx={styles.header}>
           <Typography variant="h6">{getLabel('B0002') /* 新規登録 */}</Typography>
@@ -102,6 +94,8 @@ export const UserCreateDrawer = ({ open, onClose, onCreated }: Props) => {
           <TextField
             label={getLabel('T0060') /* ログインID */}
             placeholder={getLabel('T0034', { value: getLabel('T0066') /* taro01 */ }) /* 例）{value} */}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
             {...register('userName')}
             error={!!errors.userName}
             helperText={errors.userName?.message ?? getLabel('T0050') /* *必須 */}

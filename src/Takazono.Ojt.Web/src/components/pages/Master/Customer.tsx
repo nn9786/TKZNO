@@ -37,11 +37,6 @@ const styles = {
 
 const DEFAULT_SORT_KEY = 'displayOrderNumber'
 
-/**
- * 得意先マスタは件数が少なく検索を持たない簡易な一覧(Unitと同じ構成)。
- * 「使用中止も表示」トグルの切り替えのみで即座に再取得し、全件を1ページで取得してページネーションUIは持たない。
- * 取引先(手本)とは異なり、単一日付ではなく日付範囲(契約開始日/終了日)・数値割引率という別軸の難易度を持つ。
- */
 const LIST_PAGE_SIZE = 999
 
 type SortOverrides = {
@@ -93,10 +88,6 @@ export const Customer = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeInactive])
 
-  /**
-   * 一覧のキャッシュ済みデータをそのまま編集対象にせず、クリック時点の最新値を取得し直す
-   * (他ユーザーの更新後に古いデータで編集してしまうのを防ぐ、Unitと同じ挙動)。
-   */
   const handleRowClick = async (item: CustomerDto) => {
     if (item.sid === undefined) {
       displayParameterSystemError()

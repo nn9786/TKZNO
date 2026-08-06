@@ -40,7 +40,7 @@ public class CreateStoreRequest
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     [StringLength(8)]
@@ -60,7 +60,7 @@ public class UpdateStoreRequest
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     [StringLength(8)]

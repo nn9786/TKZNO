@@ -35,7 +35,7 @@ public class CreateUnitRequest
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     public bool UseFlag { get; init; } = true;
@@ -46,7 +46,7 @@ public class UpdateUnitRequest
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     public bool UseFlag { get; init; } = true;

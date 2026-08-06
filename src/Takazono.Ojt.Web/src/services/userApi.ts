@@ -37,7 +37,7 @@ export const createUser = (req: CreateUserRequest): Promise<UserDto> => apiClien
 export const updateUser = (sid: number, req: UpdateUserRequest): Promise<UserDto> =>
   apiClient.User.Update._sid(sid).$put({ body: req })
 
-export const updateUserPassword = (sid: number, req: UpdateUserPasswordRequest): Promise<void> =>
+export const updateUserPassword = (sid: number, req: UpdateUserPasswordRequest): Promise<UserDto> =>
   apiClient.User.UpdatePassword._sid(sid).$put({ body: req })
 
 export const deleteUser = (sid: number, version: string): Promise<void> =>

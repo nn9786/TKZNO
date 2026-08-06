@@ -50,11 +50,4 @@ public class UnitController(IUnitService unitService) : ControllerBase
         await unitService.UpdateDisplayOrderAsync(request, ct);
         return NoContent();
     }
-
-    [HttpGet]
-    public async Task<IActionResult> DownloadCsv([FromQuery] string? language, CancellationToken ct)
-    {
-        var bytes = await unitService.DownloadCsvAsync(language, ct);
-        return File(bytes, "text/csv", "unit.csv");
-    }
 }

@@ -19,8 +19,7 @@ import { useErrorDialog } from '@/hooks/useErrorDialog'
 import { useKengen } from '@/hooks/useKengen'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useSystemError } from '@/hooks/useSystemError'
-import { downloadUnitsCsv, getUnit, searchUnits } from '@/services/unitApi'
-import { downloadFile } from '@/utils/downloadFile'
+import { getUnit, searchUnits } from '@/services/unitApi'
 import { handleDrawerFocus } from '@/utils/handleDrawerFocus'
 
 const styles = {
@@ -38,11 +37,6 @@ const styles = {
 
 const DEFAULT_SORT_KEY = 'displayOrderNumber'
 
-/**
- * 単位マスタは件数が少なく検索を持たない簡易な一覧（Takazono.Oliveの診療科マスタ相当の構成）。
- * 「使用中止も表示」トグルの切り替えのみで即座に再取得し、全件を1ページで取得してページネーションUIは持たない。
- * CSV出力はStoreと同じ日英切替方式で提供する。
- */
 const LIST_PAGE_SIZE = 999
 
 type SortOverrides = {
@@ -51,7 +45,7 @@ type SortOverrides = {
 }
 
 export const Unit = () => {
-  const { getLabel, language } = useLocalizationLabels()
+  const { getLabel } = useLocalizationLabels()
   const { api } = useApi()
   const { can } = useKengen()
   const { showError } = useErrorDialog()
@@ -94,10 +88,6 @@ export const Unit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeInactive])
 
-  /**
-   * 一覧のキャッシュ済みデータをそのまま編集対象にせず、クリック時点の最新値を取得し直す
-   * （他ユーザーの更新後に古いデータで編集してしまうのを防ぐ、Takazono.Oliveの`handleOpenEditDrawer`相当）。
-   */
   const handleRowClick = async (item: UnitDto) => {
     if (item.sid === undefined) {
       displayParameterSystemError()
@@ -118,12 +108,6 @@ export const Unit = () => {
 
   const handleSort = (nextSortKey: string, nextSortDirection: SortDirection) => {
     void search({ sortKey: nextSortKey, sortDirection: nextSortDirection })
-  }
-
-  const handleDownloadCsv = async () => {
-    await api(() => downloadUnitsCsv(language), {
-      onSuccess: (blob) => downloadFile(blob, 'unit.csv'),
-    })
   }
 
   const drawerStates = useMemo(
@@ -159,9 +143,6 @@ export const Unit = () => {
           label={getLabel('T0017') /* 使用中止も表示 */}
         />
         <Box sx={styles.spacer} />
-        <Button type="button" variant="outlined" onClick={() => void handleDownloadCsv()}>
-          {getLabel('B0008') /* CSV出力 */}
-        </Button>
         {can('updateOrder') && (
           <Button type="button" variant="outlined" onClick={openDisplayOrder}>
             {getLabel('T0048') /* 表示順変更 */}

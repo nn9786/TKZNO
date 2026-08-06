@@ -5,6 +5,8 @@ import type * as Types from '../../../../../@types'
 export type Methods = DefineMethods<{
   put: {
     status: 200
+    /** OK */
+    resBody: Types.UserDto
     reqBody: Types.UpdateUserPasswordRequest
   }
 }>

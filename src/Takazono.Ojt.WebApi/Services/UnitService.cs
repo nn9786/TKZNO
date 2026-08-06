@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Text;
-using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Takazono.Ojt.WebApi.Common;
 using Takazono.Ojt.WebApi.Data;
@@ -168,50 +165,6 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
             throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
         }
     }
-
-    public async Task<byte[]> DownloadCsvAsync(string? language, CancellationToken ct)
-    {
-        var rows = await db.Units
-            .AsNoTracking()
-            .OrderBy(x => x.DisplayOrderNumber)
-            .ToListAsync(ct);
-
-        using var memoryStream = new MemoryStream();
-
-        // UIの言語切替と揃えるため、CSVの見出し・改行コードもリクエストされた言語に合わせて出し分ける（Storeと同じ方式）。
-        if (string.Equals(language, "en", StringComparison.OrdinalIgnoreCase))
-        {
-            var enRows = rows.Select(ToCsvRowEn);
-            await using var writer = new StreamWriter(memoryStream, new UTF8Encoding(true), leaveOpen: true);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            await csv.WriteRecordsAsync(enRows, ct);
-        }
-        else
-        {
-            var jaRows = rows.Select(ToCsvRow);
-            await using var writer = new StreamWriter(memoryStream, Encoding.GetEncoding("shift_jis"), leaveOpen: true);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            await csv.WriteRecordsAsync(jaRows, ct);
-        }
-
-        return memoryStream.ToArray();
-    }
-
-    private static UnitCsvRow ToCsvRow(Entities.Unit x) => new()
-    {
-        Code = x.Code,
-        Name = x.Name,
-        UseFlag = x.UseFlag ? "○" : string.Empty,
-        DisplayOrderNumber = x.DisplayOrderNumber,
-    };
-
-    private static UnitCsvRowEn ToCsvRowEn(Entities.Unit x) => new()
-    {
-        Code = x.Code,
-        Name = x.Name,
-        UseFlag = x.UseFlag ? "Y" : string.Empty,
-        DisplayOrderNumber = x.DisplayOrderNumber,
-    };
 
     private static UnitDto ToDto(Entities.Unit x) => new()
     {

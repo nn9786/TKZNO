@@ -169,7 +169,7 @@ export const Supplier = () => {
         <Stack direction="row" spacing={2} sx={styles.toolbar}>
           <TextField
             size="small"
-            label={getLabel('T0016') /* キーワード */}
+            label={getLabel('T0076') /* 取引先名称 */}
             placeholder={getLabel('T0035') /* 検索キーワードを入力してください */}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}

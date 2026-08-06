@@ -30,11 +30,8 @@ public class UserController(IUserService userService) : ControllerBase
         Ok(await userService.UpdateAsync(sid, request, ct));
 
     [HttpPut("{sid:long}")]
-    public async Task<IActionResult> UpdatePassword(long sid, UpdateUserPasswordRequest request, CancellationToken ct)
-    {
-        await userService.UpdatePasswordAsync(sid, request, ct);
-        return NoContent();
-    }
+    public async Task<ActionResult<UserDto>> UpdatePassword(long sid, UpdateUserPasswordRequest request, CancellationToken ct) =>
+        Ok(await userService.UpdatePasswordAsync(sid, request, ct));
 
     [HttpDelete("{sid:long}")]
     public async Task<IActionResult> Delete(long sid, [FromQuery, Required] string version, CancellationToken ct)

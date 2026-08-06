@@ -102,10 +102,6 @@ export const Store = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  /**
-   * 一覧のキャッシュ済みデータをそのまま編集対象にせず、クリック時点の最新値を取得し直す
-   * （他ユーザーの更新後に古いデータで編集してしまうのを防ぐ、Takazono.Oliveの`handleOpenEditDrawer`相当）。
-   */
   const handleRowClick = async (item: StoreDto) => {
     if (item.sid === undefined) {
       displayParameterSystemError()
@@ -168,7 +164,7 @@ export const Store = () => {
         <Stack direction="row" spacing={2} sx={styles.toolbar}>
           <TextField
             size="small"
-            label={getLabel('T0016') /* キーワード */}
+            label={getLabel('T0031') /* 店舗名称 */}
             placeholder={getLabel('T0035') /* 検索キーワードを入力してください */}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}

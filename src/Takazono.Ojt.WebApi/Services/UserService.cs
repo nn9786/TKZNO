@@ -152,7 +152,7 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         return ToDto(entity);
     }
 
-    public async Task UpdatePasswordAsync(long sid, UpdateUserPasswordRequest request, CancellationToken ct)
+    public async Task<UserDto> UpdatePasswordAsync(long sid, UpdateUserPasswordRequest request, CancellationToken ct)
     {
         if (request.Password != request.ConfirmPassword)
         {
@@ -160,12 +160,16 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         }
 
         var entity = await FindOrThrowAsync(sid, ct);
+
+        ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), request.Version);
+
         entity.PasswordHash = Hasher.HashPassword(entity, request.Password);
         entity.ModifiedDateTime = DateTime.Now;
         entity.ModifiedSid = currentUserService.Sid;
         entity.ModifiedName = currentUserService.UserName;
 
-        await db.SaveChangesAsync(ct);
+        await SaveWithConcurrencyCheckAsync(ct);
+        return ToDto(entity);
     }
 
     public async Task DeleteAsync(long sid, string version, CancellationToken ct)

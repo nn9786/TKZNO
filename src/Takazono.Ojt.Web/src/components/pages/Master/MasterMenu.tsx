@@ -81,7 +81,7 @@ export const MasterMenu = () => {
   const role = useAppSelector((state) => state.auth.role)
 
   const items = [
-    // アカウント情報を扱うため、Adminのみカードを表示する（画面自体もProtectedRouteでAdmin限定）。ログイン管理の起点として先頭に置く。
+    // アカウント情報を扱うため、Adminのみカードを表示する（画面自体もProtectedRouteでAdmin限定）
     ...(role === 'Admin'
       ? [
           {

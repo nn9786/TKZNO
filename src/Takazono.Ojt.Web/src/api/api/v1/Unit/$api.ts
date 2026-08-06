@@ -2,7 +2,6 @@ import type { AspidaClient, BasicHeaders } from 'aspida'
 import { dataToURLString } from 'aspida'
 import type { Methods as Methods_1sji0um } from './Create'
 import type { Methods as Methods_17hurie } from './Delete/_sid@number'
-import type { Methods as Methods_qck396 } from './DownloadCsv'
 import type { Methods as Methods_1r7tdnd } from './Get/_sid@number'
 import type { Methods as Methods_gll2wl } from './GetAll'
 import type { Methods as Methods_1k9kxxu } from './Search'
@@ -13,12 +12,11 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
   const prefix = (baseURL === undefined ? '' : baseURL).replace(/\/$/, '')
   const PATH0 = '/api/v1/Unit/Create'
   const PATH1 = '/api/v1/Unit/Delete'
-  const PATH2 = '/api/v1/Unit/DownloadCsv'
-  const PATH3 = '/api/v1/Unit/Get'
-  const PATH4 = '/api/v1/Unit/GetAll'
-  const PATH5 = '/api/v1/Unit/Search'
-  const PATH6 = '/api/v1/Unit/Update'
-  const PATH7 = '/api/v1/Unit/UpdateDisplayOrder'
+  const PATH2 = '/api/v1/Unit/Get'
+  const PATH3 = '/api/v1/Unit/GetAll'
+  const PATH4 = '/api/v1/Unit/Search'
+  const PATH5 = '/api/v1/Unit/Update'
+  const PATH6 = '/api/v1/Unit/UpdateDisplayOrder'
   const GET = 'GET'
   const POST = 'POST'
   const PUT = 'PUT'
@@ -66,19 +64,9 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
         }
       },
     },
-    DownloadCsv: {
-      get: (option?: { query?: Methods_qck396['get']['query'] | undefined; config?: T | undefined } | undefined) =>
-        fetch<void, BasicHeaders, Methods_qck396['get']['status']>(prefix, PATH2, GET, option).send(),
-      $get: (option?: { query?: Methods_qck396['get']['query'] | undefined; config?: T | undefined } | undefined) =>
-        fetch<void, BasicHeaders, Methods_qck396['get']['status']>(prefix, PATH2, GET, option)
-          .send()
-          .then((r) => r.body),
-      $path: (option?: { method?: 'get' | undefined; query: Methods_qck396['get']['query'] } | undefined) =>
-        `${prefix}${PATH2}${option && option.query ? `?${dataToURLString(option.query)}` : ''}`,
-    },
     Get: {
       _sid: (val1: number) => {
-        const prefix1 = `${PATH3}/${val1}`
+        const prefix1 = `${PATH2}/${val1}`
 
         return {
           /**
@@ -114,7 +102,7 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
       get: (option?: { config?: T | undefined } | undefined) =>
         fetch<Methods_gll2wl['get']['resBody'], BasicHeaders, Methods_gll2wl['get']['status']>(
           prefix,
-          PATH4,
+          PATH3,
           GET,
           option
         ).json(),
@@ -124,13 +112,13 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
       $get: (option?: { config?: T | undefined } | undefined) =>
         fetch<Methods_gll2wl['get']['resBody'], BasicHeaders, Methods_gll2wl['get']['status']>(
           prefix,
-          PATH4,
+          PATH3,
           GET,
           option
         )
           .json()
           .then((r) => r.body),
-      $path: () => `${prefix}${PATH4}`,
+      $path: () => `${prefix}${PATH3}`,
     },
     Search: {
       /**
@@ -139,7 +127,7 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
       get: (option?: { query?: Methods_1k9kxxu['get']['query'] | undefined; config?: T | undefined } | undefined) =>
         fetch<Methods_1k9kxxu['get']['resBody'], BasicHeaders, Methods_1k9kxxu['get']['status']>(
           prefix,
-          PATH5,
+          PATH4,
           GET,
           option
         ).json(),
@@ -149,18 +137,18 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
       $get: (option?: { query?: Methods_1k9kxxu['get']['query'] | undefined; config?: T | undefined } | undefined) =>
         fetch<Methods_1k9kxxu['get']['resBody'], BasicHeaders, Methods_1k9kxxu['get']['status']>(
           prefix,
-          PATH5,
+          PATH4,
           GET,
           option
         )
           .json()
           .then((r) => r.body),
       $path: (option?: { method?: 'get' | undefined; query: Methods_1k9kxxu['get']['query'] } | undefined) =>
-        `${prefix}${PATH5}${option && option.query ? `?${dataToURLString(option.query)}` : ''}`,
+        `${prefix}${PATH4}${option && option.query ? `?${dataToURLString(option.query)}` : ''}`,
     },
     Update: {
       _sid: (val1: number) => {
-        const prefix1 = `${PATH6}/${val1}`
+        const prefix1 = `${PATH5}/${val1}`
 
         return {
           /**
@@ -191,12 +179,12 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
     },
     UpdateDisplayOrder: {
       put: (option: { body: Methods_o4f9yd['put']['reqBody']; config?: T | undefined }) =>
-        fetch<void, BasicHeaders, Methods_o4f9yd['put']['status']>(prefix, PATH7, PUT, option).send(),
+        fetch<void, BasicHeaders, Methods_o4f9yd['put']['status']>(prefix, PATH6, PUT, option).send(),
       $put: (option: { body: Methods_o4f9yd['put']['reqBody']; config?: T | undefined }) =>
-        fetch<void, BasicHeaders, Methods_o4f9yd['put']['status']>(prefix, PATH7, PUT, option)
+        fetch<void, BasicHeaders, Methods_o4f9yd['put']['status']>(prefix, PATH6, PUT, option)
           .send()
           .then((r) => r.body),
-      $path: () => `${prefix}${PATH7}`,
+      $path: () => `${prefix}${PATH6}`,
     },
   }
 }

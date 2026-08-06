@@ -321,7 +321,7 @@ namespace Takazono.Ojt.WebApi.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("m_user", (string)null);
+                    b.ToTable("m_users", (string)null);
                 });
 #pragma warning restore 612, 618
         }

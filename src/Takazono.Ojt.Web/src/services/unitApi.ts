@@ -5,7 +5,7 @@ import type {
   UpdateDisplayOrderRequest,
   UpdateUnitRequest,
 } from '@/api/@types'
-import { apiClient, axiosClient } from '@/utils/apiClient'
+import { apiClient } from '@/utils/apiClient'
 
 export type SearchUnitParams = {
   includeInactive?: boolean
@@ -41,9 +41,3 @@ export const deleteUnit = (sid: number, version: string): Promise<void> =>
 
 export const updateUnitDisplayOrder = (req: UpdateDisplayOrderRequest): Promise<void> =>
   apiClient.Unit.UpdateDisplayOrder.$put({ body: req })
-
-/** CSVはBlobで返るためaspidaの型付きクライアントを使わず、生のaxiosClientで直接取得する。 */
-export const downloadUnitsCsv = (language: string): Promise<Blob> =>
-  axiosClient
-    .get('/api/v1/Unit/DownloadCsv', { params: { language }, responseType: 'blob' })
-    .then((res) => res.data as Blob)

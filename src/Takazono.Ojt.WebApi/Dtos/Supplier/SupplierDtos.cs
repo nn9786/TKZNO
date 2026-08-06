@@ -44,7 +44,7 @@ public class CreateSupplierRequest : IValidatableObject
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     /// <summary>"Corporate" または "Individual"。</summary>
@@ -86,7 +86,7 @@ public class UpdateSupplierRequest : IValidatableObject
     [Required, StringLength(16)]
     public string Code { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     [Required]

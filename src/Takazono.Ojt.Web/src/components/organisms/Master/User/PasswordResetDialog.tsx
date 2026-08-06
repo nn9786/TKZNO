@@ -3,7 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
+import type { UserDto } from '@/api/@types'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@/components/atoms/Mui'
+import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
 import { PasswordTextField } from '@/components/molecules/Common/PasswordTextField'
 import { useApi } from '@/hooks/useApi'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
@@ -14,15 +16,17 @@ import { updateUserPassword } from '@/services/userApi'
 type Props = {
   open: boolean
   sid: number | undefined
+  version: string | undefined
   onClose: () => void
-  onDone: () => void
+  onDone: (updated: UserDto) => void
+  onConcurrencyConflict: () => void
 }
 
 /** プロフィール編集とは別アクションのパスワード再設定専用ダイアログ（Takazono.Oliveの`PasswordResetDialog`相当）。 */
-export const PasswordResetDialog = ({ open, sid, onClose, onDone }: Props) => {
+export const PasswordResetDialog = ({ open, sid, version, onClose, onDone, onConcurrencyConflict }: Props) => {
   const { getLabel } = useLocalizationLabels()
   const { api } = useApi()
-  const { displayValidationError } = useDisplayValidationError()
+  const { displayValidationError, concurrencyMessage, closeConcurrencyDialog } = useDisplayValidationError()
   const schema = useUserPasswordFieldsSchema()
 
   const form = useForm<UserPasswordFormValues>({
@@ -43,15 +47,21 @@ export const PasswordResetDialog = ({ open, sid, onClose, onDone }: Props) => {
   if (sid === undefined) return null
 
   const onSubmit = handleSubmit(async (values) => {
-    await api(() => updateUserPassword(sid, values), {
+    await api(() => updateUserPassword(sid, { ...values, version: version ?? '' }), {
       successMessage: getLabel('M0008') /* パスワードを再設定しました。 */,
       onSuccess: onDone,
-      onError: (err) => displayValidationError(err, form),
+      onError: (err) => displayValidationError(err, form, { onConcurrencyConflict }),
     })
   })
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      slotProps={{
+        transition: { onEntered: () => document.querySelector<HTMLInputElement>('input[name="password"]')?.focus() },
+      }}
+    >
       <DialogTitle>{getLabel('T0068') /* パスワード再設定 */}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1, minWidth: 320 }}>
@@ -75,6 +85,11 @@ export const PasswordResetDialog = ({ open, sid, onClose, onDone }: Props) => {
           {getLabel('B0003') /* 保存 */}
         </Button>
       </DialogActions>
+      <ConcurrencyConflictDialog
+        open={concurrencyMessage !== null}
+        message={concurrencyMessage ?? ''}
+        onReload={closeConcurrencyDialog}
+      />
     </Dialog>
   )
 }

@@ -25,7 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Unit>(e =>
         {
             e.Property(x => x.Code).HasColumnName("code").HasMaxLength(16).IsRequired();
-            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
             e.Property(x => x.UseFlag).HasColumnName("use_flag");
             e.Property(x => x.DisplayOrderNumber).HasColumnName("display_order_number");
             e.Property(x => x.UnDeleteFlag).HasColumnName("un_delete_flag");
@@ -45,7 +45,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Store>(e =>
         {
             e.Property(x => x.Code).HasColumnName("code").HasMaxLength(16).IsRequired();
-            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
             e.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(8);
             e.Property(x => x.Address).HasColumnName("address").HasMaxLength(200);
             e.Property(x => x.PhoneNumber).HasColumnName("phone_number").HasMaxLength(20);
@@ -57,7 +57,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<User>(e =>
         {
             e.Property(x => x.UserName).HasColumnName("user_name").HasMaxLength(50).IsRequired();
-            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
             e.Property(x => x.PasswordHash).HasColumnName("password_hash").HasMaxLength(200).IsRequired();
             e.Property(x => x.Role).HasColumnName("role");
             e.Property(x => x.UseFlag).HasColumnName("use_flag");
@@ -67,7 +67,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Supplier>(e =>
         {
             e.Property(x => x.Code).HasColumnName("code").HasMaxLength(16).IsRequired();
-            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
             e.Property(x => x.SupplierTypeKubun).HasColumnName("supplier_type_kubun");
             e.Property(x => x.CorporateNumber).HasColumnName("corporate_number").HasMaxLength(13);
             e.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(8);
@@ -83,7 +83,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Customer>(e =>
         {
             e.Property(x => x.Code).HasColumnName("code").HasMaxLength(16).IsRequired();
-            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
             e.Property(x => x.CustomerRankKubun).HasColumnName("customer_rank_kubun");
             e.Property(x => x.PreferentialDiscountRate).HasColumnName("preferential_discount_rate").HasColumnType("decimal(5,2)");
             e.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(8);

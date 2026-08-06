@@ -16,11 +16,11 @@ export const useUserSchema = () => {
           .string()
           .min(1, getLabel('V0001') /* 必須項目です。 */)
           .max(50, getLabel('V0002', { max: '50' }) /* {max}文字以内で入力してください。 */)
-          .regex(/^[\x20-\x7E]*$/, getLabel('V0003') /* 半角英数記号で入力してください。 */),
+          .regex(/^[a-zA-Zｦ-ﾟ0-9!-/:-@¥[-`{-~ ]*$/, getLabel('V0003') /* 半角英数字カナ記号で入力してください。 */),
         name: z
           .string()
           .min(1, getLabel('V0001') /* 必須項目です。 */)
-          .max(50, getLabel('V0002', { max: '50' }) /* {max}文字以内で入力してください。 */),
+          .max(100, getLabel('V0002', { max: '100' }) /* {max}文字以内で入力してください。 */),
         role: z.enum(['Admin', 'General']),
         useFlag: z.boolean(),
       }),
@@ -67,7 +67,7 @@ export const useUserCreateSchema = () => {
             .string()
             .min(1, getLabel('V0001') /* 必須項目です。 */)
             .max(50, getLabel('V0002', { max: '50' }) /* {max}文字以内で入力してください。 */)
-            .regex(/^[\x20-\x7E]*$/, getLabel('V0003') /* 半角英数記号で入力してください。 */),
+            .regex(/^[a-zA-Zｦ-ﾟ0-9!-/:-@¥[-`{-~ ]*$/, getLabel('V0003') /* 半角英数字カナ記号で入力してください。 */),
           name: z
             .string()
             .min(1, getLabel('V0001') /* 必須項目です。 */)

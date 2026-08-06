@@ -85,6 +85,7 @@ export const SupplierCreateDrawer = ({ open, onClose, onCreated }: Props) => {
       () =>
         createSupplier({
           ...values,
+          corporateNumber: isCorporate ? values.corporateNumber : '',
           creditLimit: values.creditLimit ? Number(values.creditLimit) : undefined,
         }),
       {
@@ -145,6 +146,7 @@ export const SupplierCreateDrawer = ({ open, onClose, onCreated }: Props) => {
           <TextField
             label={getLabel('T0080') /* 法人番号 */}
             placeholder={getLabel('T0034', { value: getLabel('T0096') /* 1234567890123 */ }) /* 例）{value} */}
+            disabled={!isCorporate}
             {...register('corporateNumber')}
             error={!!errors.corporateNumber}
             helperText={errors.corporateNumber?.message ?? (isCorporate ? getLabel('T0050') /* *必須 */ : undefined)}

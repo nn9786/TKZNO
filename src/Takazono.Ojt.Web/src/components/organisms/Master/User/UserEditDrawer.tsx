@@ -58,11 +58,12 @@ type Props = {
   user: UserDto | null
   onClose: () => void
   onSaved: () => void
+  onPasswordReset: (updated: UserDto) => void
 }
 
 const formatDateTime = (value: string | undefined) => (value ? format(new Date(value), 'yyyy/MM/dd HH:mm') : '')
 
-export const UserEditDrawer = ({ user, onClose, onSaved }: Props) => {
+export const UserEditDrawer = ({ user, onClose, onSaved, onPasswordReset }: Props) => {
   const { getLabel } = useLocalizationLabels()
   const { api } = useApi()
   const { can } = useKengen()
@@ -228,8 +229,16 @@ export const UserEditDrawer = ({ user, onClose, onSaved }: Props) => {
       <PasswordResetDialog
         open={isPasswordResetOpen}
         sid={user.sid}
+        version={user.version ?? undefined}
         onClose={closePasswordReset}
-        onDone={closePasswordReset}
+        onDone={(updated) => {
+          closePasswordReset()
+          onPasswordReset(updated)
+        }}
+        onConcurrencyConflict={() => {
+          closePasswordReset()
+          onSaved()
+        }}
       />
       <ConfirmDialog
         open={isRoleChangeConfirmOpen}

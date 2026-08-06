@@ -233,6 +233,7 @@ export type UpdateUnitRequest = {
 export type UpdateUserPasswordRequest = {
   password: string
   confirmPassword: string
+  version: string
 }
 
 export type UpdateUserRequest = {

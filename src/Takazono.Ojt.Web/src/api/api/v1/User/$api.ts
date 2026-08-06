@@ -167,11 +167,27 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
         const prefix1 = `${PATH6}/${val1}`
 
         return {
+          /**
+           * @returns OK
+           */
           put: (option: { body: Methods_g9enst['put']['reqBody']; config?: T | undefined }) =>
-            fetch<void, BasicHeaders, Methods_g9enst['put']['status']>(prefix, prefix1, PUT, option).send(),
+            fetch<Methods_g9enst['put']['resBody'], BasicHeaders, Methods_g9enst['put']['status']>(
+              prefix,
+              prefix1,
+              PUT,
+              option
+            ).json(),
+          /**
+           * @returns OK
+           */
           $put: (option: { body: Methods_g9enst['put']['reqBody']; config?: T | undefined }) =>
-            fetch<void, BasicHeaders, Methods_g9enst['put']['status']>(prefix, prefix1, PUT, option)
-              .send()
+            fetch<Methods_g9enst['put']['resBody'], BasicHeaders, Methods_g9enst['put']['status']>(
+              prefix,
+              prefix1,
+              PUT,
+              option
+            )
+              .json()
               .then((r) => r.body),
           $path: () => `${prefix}${prefix1}`,
         }

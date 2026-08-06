@@ -37,7 +37,7 @@ public class CreateUserRequest
     [Required, StringLength(50)]
     public string UserName { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     /// <summary>"Admin" または "General"。</summary>
@@ -58,7 +58,7 @@ public class UpdateUserRequest
     [Required, StringLength(50)]
     public string UserName { get; init; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(100)]
     public string Name { get; init; } = string.Empty;
 
     [Required]
@@ -78,4 +78,7 @@ public class UpdateUserPasswordRequest
 
     [Required]
     public string ConfirmPassword { get; init; } = string.Empty;
+
+    [Required]
+    public string Version { get; init; } = string.Empty;
 }

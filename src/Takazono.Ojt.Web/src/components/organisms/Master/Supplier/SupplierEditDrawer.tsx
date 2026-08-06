@@ -105,6 +105,7 @@ export const SupplierEditDrawer = ({ supplier, onClose, onSaved }: Props) => {
       () =>
         updateSupplier(supplier.sid!, {
           ...values,
+          corporateNumber: isCorporate ? values.corporateNumber : '',
           creditLimit: values.creditLimit ? Number(values.creditLimit) : undefined,
           version: supplier.version ?? '',
         }),
@@ -175,6 +176,7 @@ export const SupplierEditDrawer = ({ supplier, onClose, onSaved }: Props) => {
           />
           <TextField
             label={getLabel('T0080') /* 法人番号 */}
+            disabled={!isCorporate}
             {...register('corporateNumber')}
             error={!!errors.corporateNumber}
             helperText={errors.corporateNumber?.message ?? (isCorporate ? getLabel('T0050') /* *必須 */ : undefined)}

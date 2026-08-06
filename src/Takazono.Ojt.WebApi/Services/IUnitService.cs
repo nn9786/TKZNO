@@ -12,5 +12,4 @@ public interface IUnitService
     Task<UnitDto> UpdateAsync(long sid, UpdateUnitRequest request, CancellationToken ct);
     Task DeleteAsync(long sid, string version, CancellationToken ct);
     Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct);
-    Task<byte[]> DownloadCsvAsync(string? language, CancellationToken ct);
 }

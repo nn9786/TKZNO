@@ -12,8 +12,8 @@ using Takazono.Ojt.WebApi.Data;
 namespace Takazono.Ojt.WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260802183224_RenameUsersTableToMUser")]
-    partial class RenameUsersTableToMUser
+    [Migration("20260802183224_RenameUsersTableToMUsers")]
+    partial class RenameUsersTableToMUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -263,7 +263,7 @@ namespace Takazono.Ojt.WebApi.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("m_user", (string)null);
+                    b.ToTable("m_users", (string)null);
                 });
 #pragma warning restore 612, 618
         }

@@ -107,12 +107,28 @@ public class UnitService(AppDbContext db) : IUnitService
         }
 
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
+
+        var deletedOrder = entity.DisplayOrderNumber;
         db.Units.Remove(entity);
+
+        // 削除後に表示順が欠番のまま残らないよう、後続の表示順を1つずつ繰り上げる。
+        var subsequentEntities = await db.Units.Where(x => x.DisplayOrderNumber > deletedOrder).ToListAsync(ct);
+        foreach (var subsequent in subsequentEntities)
+        {
+            subsequent.DisplayOrderNumber -= 1;
+        }
+
         await db.SaveChangesAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
     {
+        var totalCount = await db.Units.CountAsync(ct);
+        if (request.Items.Count != totalCount)
+        {
+            throw new BusinessRuleAppException("表示順の更新には全件を送信してください。");
+        }
+
         var sids = request.Items.Select(x => x.Sid).ToList();
         var entities = await db.Units.Where(x => sids.Contains(x.Sid)).ToDictionaryAsync(x => x.Sid, ct);
 

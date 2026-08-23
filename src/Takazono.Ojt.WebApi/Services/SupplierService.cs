@@ -124,12 +124,28 @@ public class SupplierService(AppDbContext db) : ISupplierService
     {
         var entity = await FindOrThrowAsync(sid, ct);
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
+
+        var deletedOrder = entity.DisplayOrderNumber;
         db.Suppliers.Remove(entity);
+
+        // 削除後に表示順が欠番のまま残らないよう、後続の表示順を1つずつ繰り上げる。
+        var subsequentEntities = await db.Suppliers.Where(x => x.DisplayOrderNumber > deletedOrder).ToListAsync(ct);
+        foreach (var subsequent in subsequentEntities)
+        {
+            subsequent.DisplayOrderNumber -= 1;
+        }
+
         await db.SaveChangesAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
     {
+        var totalCount = await db.Suppliers.CountAsync(ct);
+        if (request.Items.Count != totalCount)
+        {
+            throw new BusinessRuleAppException("表示順の更新には全件を送信してください。");
+        }
+
         var sids = request.Items.Select(x => x.Sid).ToList();
         var entities = await db.Suppliers.Where(x => sids.Contains(x.Sid)).ToDictionaryAsync(x => x.Sid, ct);
 

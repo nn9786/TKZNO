@@ -1,3 +1,4 @@
+// ページネーション
 import { memo } from 'react'
 
 import { Box, MenuItem, Pagination as MuiPagination, Select, Stack, Typography } from '@/components/atoms/Mui'

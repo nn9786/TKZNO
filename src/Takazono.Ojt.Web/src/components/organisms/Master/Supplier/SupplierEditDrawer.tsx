@@ -6,10 +6,8 @@ import { useForm } from 'react-hook-form'
 
 import type { SupplierDto } from '@/api/@types'
 import { Box, Button, Divider, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
-import { ConfirmDialog } from '@/components/molecules/Common/ConfirmDialog'
-import { ReactHookFormSelect } from '@/components/molecules/ReactHookForm/ReactHookFormSelect'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { ConcurrencyConflictDialog, ConfirmDialog } from '@/components/molecules/Common'
+import { ReactHookFormSelect, ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
@@ -100,6 +98,7 @@ export const SupplierEditDrawer = ({ supplier, onClose, onSaved }: Props) => {
 
   if (!supplier) return null
 
+  // 編集処理
   const onSubmit = handleSubmit(async (values) => {
     await api(
       () =>
@@ -117,6 +116,7 @@ export const SupplierEditDrawer = ({ supplier, onClose, onSaved }: Props) => {
     )
   })
 
+  // 削除処理
   const handleDelete = async () => {
     closeDeleteDialog()
     await api(() => deleteSupplier(supplier.sid!, supplier.version ?? ''), {

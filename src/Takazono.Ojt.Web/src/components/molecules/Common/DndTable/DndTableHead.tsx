@@ -1,3 +1,4 @@
+// 表示順変更用ドラッグ&ドロップテーブル(Head)
 import type { ReactNode } from 'react'
 
 import { Box } from '@/components/atoms/Mui'

@@ -2,7 +2,7 @@
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded'
 
 import { Box, Paper, Stack, Typography } from '@/components/atoms/Mui'
-import { Base } from '@/components/templates/Base'
+import { Base } from '@/components/templates'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { appColors } from '@/styles/theme'
 

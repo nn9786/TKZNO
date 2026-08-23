@@ -1,3 +1,4 @@
+// 認証・権限ガード付きルート
 import type { ReactElement } from 'react'
 import { Navigate } from 'react-router-dom'
 

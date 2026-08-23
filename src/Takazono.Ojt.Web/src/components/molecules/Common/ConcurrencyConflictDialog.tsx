@@ -1,3 +1,4 @@
+// 排他制御(競合)ダイアログ
 import { memo } from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@/components/atoms/Mui'

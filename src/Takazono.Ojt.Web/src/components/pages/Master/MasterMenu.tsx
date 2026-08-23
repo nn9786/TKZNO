@@ -8,7 +8,7 @@ import StraightenRoundedIcon from '@mui/icons-material/StraightenRounded'
 import { useNavigate } from 'react-router-dom'
 
 import { Box, Paper, Stack, Typography } from '@/components/atoms/Mui'
-import { Base } from '@/components/templates/Base'
+import { Base } from '@/components/templates'
 import { ROUTE } from '@/constants/route'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppSelector } from '@/hooks/useStore'

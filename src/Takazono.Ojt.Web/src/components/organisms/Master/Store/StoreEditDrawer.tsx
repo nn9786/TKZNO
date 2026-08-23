@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form'
 
 import type { StoreDto } from '@/api/@types'
 import { Box, Button, Divider, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
-import { ConfirmDialog } from '@/components/molecules/Common/ConfirmDialog'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { ConcurrencyConflictDialog, ConfirmDialog } from '@/components/molecules/Common'
+import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
@@ -91,6 +90,7 @@ export const StoreEditDrawer = ({ store, onClose, onSaved }: Props) => {
 
   if (!store) return null
 
+  // 編集処理
   const onSubmit = handleSubmit(async (values) => {
     await api(() => updateStore(store.sid!, { ...values, version: store.version ?? '' }), {
       successMessage: getLabel('M0002') /* 更新しました。 */,
@@ -99,6 +99,7 @@ export const StoreEditDrawer = ({ store, onClose, onSaved }: Props) => {
     })
   })
 
+  // 削除処理
   const handleDelete = async () => {
     closeDeleteDialog()
     await api(() => deleteStore(store.sid!, store.version ?? ''), {

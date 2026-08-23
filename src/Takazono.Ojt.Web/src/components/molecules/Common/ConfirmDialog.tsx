@@ -1,3 +1,4 @@
+// 汎用確認ダイアログ
 import { memo } from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@/components/atoms/Mui'

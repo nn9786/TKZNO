@@ -1,3 +1,4 @@
+// 汎用エラーダイアログ
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@/components/atoms/Mui'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppDispatch, useAppSelector } from '@/hooks/useStore'

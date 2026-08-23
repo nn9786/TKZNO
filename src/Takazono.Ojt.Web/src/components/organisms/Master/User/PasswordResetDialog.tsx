@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form'
 
 import type { UserDto } from '@/api/@types'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
-import { PasswordTextField } from '@/components/molecules/Common/PasswordTextField'
+import { ConcurrencyConflictDialog, PasswordTextField } from '@/components/molecules/Common'
 import { useApi } from '@/hooks/useApi'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
@@ -46,6 +45,7 @@ export const PasswordResetDialog = ({ open, sid, version, onClose, onDone, onCon
 
   if (sid === undefined) return null
 
+  // パスワード再設定処理
   const onSubmit = handleSubmit(async (values) => {
     await api(() => updateUserPassword(sid, { ...values, version: version ?? '' }), {
       successMessage: getLabel('M0008') /* パスワードを再設定しました。 */,

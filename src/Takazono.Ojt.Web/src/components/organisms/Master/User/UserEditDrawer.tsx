@@ -6,10 +6,8 @@ import { useForm } from 'react-hook-form'
 
 import type { UserDto } from '@/api/@types'
 import { Box, Button, Divider, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
-import { ConfirmDialog } from '@/components/molecules/Common/ConfirmDialog'
-import { ReactHookFormSelect } from '@/components/molecules/ReactHookForm/ReactHookFormSelect'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { ConcurrencyConflictDialog, ConfirmDialog } from '@/components/molecules/Common'
+import { ReactHookFormSelect, ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { PasswordResetDialog } from '@/components/organisms/Master/User/PasswordResetDialog'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
@@ -99,6 +97,7 @@ export const UserEditDrawer = ({ user, onClose, onSaved, onPasswordReset }: Prop
 
   const isSelf = currentSid !== null && user.sid === currentSid
 
+  // 編集処理
   const performUpdate = async (values: UserFormValues) => {
     await api(() => updateUser(user.sid!, { ...values, version: user.version ?? '' }), {
       successMessage: getLabel('M0002') /* 更新しました。 */,
@@ -126,6 +125,7 @@ export const UserEditDrawer = ({ user, onClose, onSaved, onPasswordReset }: Prop
     }
   }
 
+  // 削除処理
   const handleDelete = async () => {
     closeDeleteDialog()
     await api(() => deleteUser(user.sid!, user.version ?? ''), {

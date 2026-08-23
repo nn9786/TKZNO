@@ -15,8 +15,7 @@ import {
   TableRow,
   Typography,
 } from '@/components/atoms/Mui'
-import { OverflowText } from '@/components/molecules/Common/OverflowText'
-import { SortableTableHeaderCell, type SortDirection } from '@/components/molecules/Common/SortableTableHeaderCell'
+import { OverflowText, SortableTableHeaderCell, type SortDirection } from '@/components/molecules/Common'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 
 const styles = {

@@ -1,3 +1,4 @@
+// 表示順変更用ドラッグ&ドロップテーブル(Row)
 import { Draggable } from '@hello-pangea/dnd'
 import DragIndicatorRoundedIcon from '@mui/icons-material/DragIndicatorRounded'
 import type { ReactNode } from 'react'

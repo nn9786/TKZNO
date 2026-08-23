@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import type { SupplierDto } from '@/api/@types'
 import { Box, Button, Drawer, Stack, Typography } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
+import { ConcurrencyConflictDialog } from '@/components/molecules/Common'
 import { DndTableBody, DndTableHead, DndTableRow } from '@/components/molecules/Common/DndTable'
 import { useApi } from '@/hooks/useApi'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
@@ -58,6 +58,7 @@ export const SupplierDisplayOrderDrawer = ({ open, onClose, onSaved }: Props) =>
   const { displayValidationError, concurrencyMessage, closeConcurrencyDialog } = useDisplayValidationError()
   const [items, setItems] = useState<SupplierDto[]>([])
 
+  // 全件取得
   const fetchAll = useCallback(async () => {
     await api(
       () =>
@@ -81,6 +82,7 @@ export const SupplierDisplayOrderDrawer = ({ open, onClose, onSaved }: Props) =>
     setItems((prev) => reorder(prev, result.source.index, result.destination!.index))
   }
 
+  // 表示順変更保存処理
   const handleSave = async () => {
     const req = { items: items.map((item) => ({ sid: item.sid!, version: item.version ?? '' })) }
     await api(() => updateSupplierDisplayOrder(req), {

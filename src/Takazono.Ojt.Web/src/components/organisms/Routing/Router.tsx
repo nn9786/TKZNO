@@ -1,8 +1,8 @@
+// アプリケーションルーティング
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom'
 
 import { ProtectedRoute } from '@/components/organisms/Routing/ProtectedRoute'
-import { Dashboard } from '@/components/pages/Dashboard'
-import { Login } from '@/components/pages/Login'
+import { Dashboard, Login } from '@/components/pages'
 import { Customer, MasterMenu, Store, Supplier, Unit, User } from '@/components/pages/Master'
 import { ROUTE } from '@/constants/route'
 

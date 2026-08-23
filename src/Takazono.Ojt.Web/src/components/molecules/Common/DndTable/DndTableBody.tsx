@@ -1,3 +1,4 @@
+// 表示順変更用ドラッグ&ドロップテーブル(Body)
 import { DragDropContext, Droppable, type DropResult } from '@hello-pangea/dnd'
 import type { ReactNode } from 'react'
 

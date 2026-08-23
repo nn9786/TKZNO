@@ -1,3 +1,4 @@
+// ソート可能な一覧テーブル見出しセル
 import { memo } from 'react'
 
 import { TableCell, TableSortLabel } from '@/components/atoms/Mui'

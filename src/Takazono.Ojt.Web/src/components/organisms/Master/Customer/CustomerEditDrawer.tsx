@@ -6,10 +6,8 @@ import { useForm } from 'react-hook-form'
 
 import type { CustomerDto } from '@/api/@types'
 import { Box, Button, Chip, Divider, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
-import { ConfirmDialog } from '@/components/molecules/Common/ConfirmDialog'
-import { ReactHookFormSelect } from '@/components/molecules/ReactHookForm/ReactHookFormSelect'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { ConcurrencyConflictDialog, ConfirmDialog } from '@/components/molecules/Common'
+import { ReactHookFormSelect, ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
 import { type CustomerFormValues, useCustomerSchema } from '@/hooks/useCustomerSchema'
@@ -107,6 +105,7 @@ export const CustomerEditDrawer = ({ customer, onClose, onSaved }: Props) => {
 
   const isExpired = isPastDate(customer.contractEndDate)
 
+  // 編集処理
   const onSubmit = handleSubmit(async (values) => {
     await api(
       () =>
@@ -126,6 +125,7 @@ export const CustomerEditDrawer = ({ customer, onClose, onSaved }: Props) => {
     )
   })
 
+  // 削除処理
   const handleDelete = async () => {
     closeDeleteDialog()
     await api(() => deleteCustomer(customer.sid!, customer.version ?? ''), {

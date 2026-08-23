@@ -3,8 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import { Box, Button, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { ReactHookFormSelect } from '@/components/molecules/ReactHookForm/ReactHookFormSelect'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { ReactHookFormSelect, ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { useApi } from '@/hooks/useApi'
 import { type CustomerFormValues, useCustomerSchema } from '@/hooks/useCustomerSchema'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
@@ -80,6 +79,7 @@ export const CustomerCreateDrawer = ({ open, onClose, onCreated }: Props) => {
 
   const isPremium = watch('customerRankKubun') === 'Premium'
 
+  // 新規登録処理
   const onSubmit = handleSubmit(async (values) => {
     await api(
       () =>

@@ -1,3 +1,4 @@
+// 共通ヘッダー
 import { useNavigate } from 'react-router-dom'
 
 import { AppBar, Box, Button, MenuItem, Select, Toolbar, Typography } from '@/components/atoms/Mui'

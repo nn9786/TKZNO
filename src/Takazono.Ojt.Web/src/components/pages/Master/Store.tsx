@@ -3,15 +3,14 @@ import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 
 import type { StoreDto } from '@/api/@types'
 import { Box, Button, Checkbox, FormControlLabel, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { Breadcrumbs } from '@/components/molecules/Common/Breadcrumbs'
-import type { SortDirection } from '@/components/molecules/Common/SortableTableHeaderCell'
+import { Breadcrumbs, type SortDirection } from '@/components/molecules/Common'
 import {
   StoreCreateDrawer,
   StoreDisplayOrderDrawer,
   StoreEditDrawer,
   StoreListTable,
 } from '@/components/organisms/Master/Store'
-import { Base } from '@/components/templates/Base'
+import { Base } from '@/components/templates'
 import { ROUTE } from '@/constants/route'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
@@ -68,6 +67,7 @@ export const Store = () => {
   const [editing, setEditing] = useState<StoreDto | null>(null)
   const focusTargetRef = useRef<HTMLButtonElement>(null)
 
+  // 検索処理
   const search = useCallback(
     async (overrides?: SearchOverrides) => {
       await api(
@@ -128,6 +128,7 @@ export const Store = () => {
     void search({ pageNumber: nextPageNumber, pageSize: nextPageSize })
   }
 
+  // CSV出力処理
   const handleDownloadCsv = async () => {
     await api(() => downloadStoresCsv(language), {
       onSuccess: (blob) => downloadFile(blob, 'store.csv'),

@@ -1,3 +1,4 @@
+// 共通レイアウトテンプレート
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import HomeWorkRoundedIcon from '@mui/icons-material/HomeWorkRounded'
 import KeyboardDoubleArrowLeftRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
@@ -7,8 +8,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Box, Button, CircularProgress, Paper, Stack, Typography } from '@/components/atoms/Mui'
-import { GlobalDialog } from '@/components/organisms/Common/GlobalDialog'
-import { Header } from '@/components/organisms/Common/Header'
+import { GlobalDialog, Header } from '@/components/organisms/Common'
 import { ROUTE } from '@/constants/route'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppSelector } from '@/hooks/useStore'

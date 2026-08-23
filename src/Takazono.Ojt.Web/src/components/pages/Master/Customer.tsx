@@ -3,15 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { CustomerDto } from '@/api/@types'
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@/components/atoms/Mui'
-import { Breadcrumbs } from '@/components/molecules/Common/Breadcrumbs'
-import type { SortDirection } from '@/components/molecules/Common/SortableTableHeaderCell'
+import { Breadcrumbs, type SortDirection } from '@/components/molecules/Common'
 import {
   CustomerCreateDrawer,
   CustomerDisplayOrderDrawer,
   CustomerEditDrawer,
   CustomerListTable,
 } from '@/components/organisms/Master/Customer'
-import { Base } from '@/components/templates/Base'
+import { Base } from '@/components/templates'
 import { ROUTE } from '@/constants/route'
 import { useApi } from '@/hooks/useApi'
 import { useBoolean } from '@/hooks/useBoolean'
@@ -60,6 +59,7 @@ export const Customer = () => {
   const [editing, setEditing] = useState<CustomerDto | null>(null)
   const focusTargetRef = useRef<HTMLButtonElement>(null)
 
+  // 検索処理
   const search = useCallback(
     async (overrides?: SortOverrides) => {
       await api(

@@ -1,3 +1,4 @@
+// 省略表示テキスト
 import { memo, useLayoutEffect, useRef, useState } from 'react'
 
 import { Tooltip, Typography } from '@/components/atoms/Mui'

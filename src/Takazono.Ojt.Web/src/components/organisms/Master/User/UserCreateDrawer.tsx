@@ -3,9 +3,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import { Box, Button, Drawer, Stack, TextField, Typography } from '@/components/atoms/Mui'
-import { PasswordTextField } from '@/components/molecules/Common/PasswordTextField'
-import { ReactHookFormSelect } from '@/components/molecules/ReactHookForm/ReactHookFormSelect'
-import { ReactHookFormSwitch } from '@/components/molecules/ReactHookForm/ReactHookFormSwitch'
+import { PasswordTextField } from '@/components/molecules/Common'
+import { ReactHookFormSelect, ReactHookFormSwitch } from '@/components/molecules/ReactHookForm'
 import { useApi } from '@/hooks/useApi'
 import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
@@ -67,6 +66,7 @@ export const UserCreateDrawer = ({ open, onClose, onCreated }: Props) => {
     formState: { errors, isSubmitting },
   } = form
 
+  // 新規登録処理
   const onSubmit = handleSubmit(async (values) => {
     await api(() => createUser(values), {
       successMessage: getLabel('M0001') /* 登録しました。 */,

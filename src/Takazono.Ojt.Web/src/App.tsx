@@ -4,7 +4,7 @@ import { SnackbarProvider } from 'notistack'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
-import { AppRouter } from '@/components/organisms/Routing/Router'
+import { AppRouter } from '@/components/organisms/Routing'
 import { persistor, store } from '@/store/store'
 import { theme } from '@/styles/theme'
 

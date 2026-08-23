@@ -13,9 +13,7 @@ import {
   TableRow,
   Typography,
 } from '@/components/atoms/Mui'
-import { OverflowText } from '@/components/molecules/Common/OverflowText'
-import { Pagination } from '@/components/molecules/Common/Pagination'
-import { SortableTableHeaderCell, type SortDirection } from '@/components/molecules/Common/SortableTableHeaderCell'
+import { OverflowText, Pagination, SortableTableHeaderCell, type SortDirection } from '@/components/molecules/Common'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 
 const styles = {

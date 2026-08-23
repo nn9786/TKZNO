@@ -8,7 +8,7 @@ using Takazono.Ojt.WebApi.Dtos.Store;
 
 namespace Takazono.Ojt.WebApi.Services;
 
-public class StoreService(AppDbContext db, ICurrentUserService currentUserService) : IStoreService
+public class StoreService(AppDbContext db) : IStoreService
 {
     private static readonly HashSet<string> AllowedSortKeys = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -25,7 +25,7 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
         }
 
         // フリーワード（名称、複数語はAND・部分一致）とコード（完全一致）を別条件として適用する（Takazono.Oliveの検索仕様に合わせている）。
-        foreach (var word in SplitKeywords(request.Keyword))
+        foreach (var word in KeywordSearchHelper.Split(request.Keyword))
         {
             query = query.Where(x => x.Name.Contains(word));
         }
@@ -37,11 +37,9 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
 
         var totalCount = await query.CountAsync(ct);
 
-        var sortKey = AllowedSortKeys.Contains(request.SortKey ?? string.Empty) ? request.SortKey! : "displayOrderNumber";
-        var descending = string.Equals(request.SortDirection, SortDirections.Descending, StringComparison.OrdinalIgnoreCase);
+        var sortKey = PagingHelper.ResolveSortKey(request.SortKey, AllowedSortKeys, "displayOrderNumber");
+        var descending = PagingHelper.IsDescending(request.SortDirection);
 
-        // 各キーの後ろにSid昇順のタイブレーカーを付け、同値行が並ぶ場合でもページ送りで重複/欠落が起きないようにする
-        // （SQL Serverは単一列ソートで同値行の順序を保証しないため）。
         IOrderedQueryable<Entities.Store> sortedQuery = sortKey.ToLowerInvariant() switch
         {
             "code" => descending ? query.OrderByDescending(x => x.Code) : query.OrderBy(x => x.Code),
@@ -49,26 +47,8 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
             "useflag" => descending ? query.OrderByDescending(x => x.UseFlag) : query.OrderBy(x => x.UseFlag),
             _ => descending ? query.OrderByDescending(x => x.DisplayOrderNumber) : query.OrderBy(x => x.DisplayOrderNumber),
         };
-        sortedQuery = sortedQuery.ThenBy(x => x.Sid);
 
-        var pageNumber = Math.Max(1, request.PageNumber);
-        var pageSize = Math.Max(1, request.PageSize);
-
-        var items = await sortedQuery
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => ToDto(x))
-            .ToListAsync(ct);
-
-        return new PagedResult<StoreDto>
-        {
-            Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            SortKey = sortKey,
-            SortDirection = descending ? SortDirections.Descending : SortDirections.Ascending,
-        };
+        return await PagingHelper.BuildAsync(sortedQuery, totalCount, request.PageNumber, request.PageSize, sortKey, descending, ToDto, ct);
     }
 
     public async Task<IReadOnlyList<StoreDto>> GetAllAsync(CancellationToken ct) =>
@@ -93,7 +73,6 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
         }
 
         var maxOrder = await db.Stores.MaxAsync(x => (int?)x.DisplayOrderNumber, ct) ?? 0;
-        var now = DateTime.Now;
 
         var entity = new Entities.Store
         {
@@ -104,12 +83,6 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
             PhoneNumber = request.PhoneNumber,
             UseFlag = request.UseFlag,
             DisplayOrderNumber = maxOrder + 1,
-            CreatedDateTime = now,
-            ModifiedDateTime = now,
-            CreatedSid = currentUserService.Sid,
-            CreatedName = currentUserService.UserName,
-            ModifiedSid = currentUserService.Sid,
-            ModifiedName = currentUserService.UserName,
         };
 
         db.Stores.Add(entity);
@@ -134,11 +107,8 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
         entity.Address = request.Address;
         entity.PhoneNumber = request.PhoneNumber;
         entity.UseFlag = request.UseFlag;
-        entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedSid = currentUserService.Sid;
-        entity.ModifiedName = currentUserService.UserName;
 
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
         return ToDto(entity);
     }
 
@@ -147,39 +117,31 @@ public class StoreService(AppDbContext db, ICurrentUserService currentUserServic
         var entity = await FindOrThrowAsync(sid, ct);
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
         db.Stores.Remove(entity);
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
     {
-        var entities = await db.Stores.Where(x => request.OrderedSids.Contains(x.Sid)).ToListAsync(ct);
-        foreach (var entity in entities)
+        var sids = request.Items.Select(x => x.Sid).ToList();
+        var entities = await db.Stores.Where(x => sids.Contains(x.Sid)).ToDictionaryAsync(x => x.Sid, ct);
+
+        for (var i = 0; i < request.Items.Count; i++)
         {
-            entity.DisplayOrderNumber = request.OrderedSids.IndexOf(entity.Sid) + 1;
+            var item = request.Items[i];
+            if (!entities.TryGetValue(item.Sid, out var entity))
+            {
+                throw new NotFoundAppException($"店舗(Sid={item.Sid})が見つかりません。");
+            }
+
+            ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), item.Version);
+            entity.DisplayOrderNumber = i + 1;
         }
+
         await db.SaveChangesAsync(ct);
     }
 
-    /// <summary>半角/全角スペースで区切って複数キーワードに分解する（Takazono.Oliveの`filterFreeWord`相当。分割はフロントではなくここで行う）。</summary>
-    private static string[] SplitKeywords(string? keyword) =>
-        string.IsNullOrWhiteSpace(keyword)
-            ? []
-            : keyword.Split([' ', '　'], StringSplitOptions.RemoveEmptyEntries);
-
     private async Task<Entities.Store> FindOrThrowAsync(long sid, CancellationToken ct) =>
         await db.Stores.FindAsync([sid], ct) ?? throw new NotFoundAppException($"店舗(Sid={sid})が見つかりません。");
-
-    private async Task SaveWithConcurrencyCheckAsync(CancellationToken ct)
-    {
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
-        }
-    }
 
     public async Task<byte[]> DownloadCsvAsync(string? language, CancellationToken ct)
     {

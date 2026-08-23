@@ -37,7 +37,8 @@ export const useDisplayValidationError = () => {
 
   const displayValidationError = <TFieldValues extends FieldValues>(
     error: unknown,
-    form: UseFormReturn<TFieldValues>,
+    // 表示順変更ドロワーのようにフォームを持たない呼び出し元もあるため省略可能（その場合は競合以外のエラーは既定のSnackbarに委ねる）。
+    form?: UseFormReturn<TFieldValues>,
     options?: DisplayValidationErrorOptions
   ) => {
     const status = isAxiosError(error) ? error.response?.status : undefined
@@ -51,7 +52,7 @@ export const useDisplayValidationError = () => {
 
     const validationErrors = status === 400 ? problem?.errors : undefined
 
-    if (!validationErrors) {
+    if (!validationErrors || !form) {
       showFallback(error)
       return
     }

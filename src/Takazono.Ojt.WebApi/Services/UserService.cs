@@ -28,7 +28,7 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         }
 
         // フリーワード（表示名、複数語はAND・部分一致）とログインID（完全一致）を別条件として適用する（Storeと同じくTakazono.Oliveの検索仕様に合わせている）。
-        foreach (var word in SplitKeywords(request.Keyword))
+        foreach (var word in KeywordSearchHelper.Split(request.Keyword))
         {
             query = query.Where(x => x.Name.Contains(word));
         }
@@ -40,11 +40,9 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
 
         var totalCount = await query.CountAsync(ct);
 
-        var sortKey = AllowedSortKeys.Contains(request.SortKey ?? string.Empty) ? request.SortKey! : "userName";
-        var descending = string.Equals(request.SortDirection, SortDirections.Descending, StringComparison.OrdinalIgnoreCase);
+        var sortKey = PagingHelper.ResolveSortKey(request.SortKey, AllowedSortKeys, "userName");
+        var descending = PagingHelper.IsDescending(request.SortDirection);
 
-        // 各キーの後ろにSid昇順のタイブレーカーを付け、同値行が並ぶ場合でもページ送りで重複/欠落が起きないようにする
-        // （SQL Serverは単一列ソートで同値行の順序を保証しないため）。
         IOrderedQueryable<Entities.User> sortedQuery = sortKey.ToLowerInvariant() switch
         {
             "name" => descending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
@@ -52,26 +50,8 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
             "useflag" => descending ? query.OrderByDescending(x => x.UseFlag) : query.OrderBy(x => x.UseFlag),
             _ => descending ? query.OrderByDescending(x => x.UserName) : query.OrderBy(x => x.UserName),
         };
-        sortedQuery = sortedQuery.ThenBy(x => x.Sid);
 
-        var pageNumber = Math.Max(1, request.PageNumber);
-        var pageSize = Math.Max(1, request.PageSize);
-
-        var items = await sortedQuery
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => ToDto(x))
-            .ToListAsync(ct);
-
-        return new PagedResult<UserDto>
-        {
-            Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            SortKey = sortKey,
-            SortDirection = descending ? SortDirections.Descending : SortDirections.Ascending,
-        };
+        return await PagingHelper.BuildAsync(sortedQuery, totalCount, request.PageNumber, request.PageSize, sortKey, descending, ToDto, ct);
     }
 
     public async Task<UserDto> GetAsync(long sid, CancellationToken ct)
@@ -93,7 +73,6 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         }
 
         var role = ParseRole(request.Role);
-        var now = DateTime.Now;
 
         var entity = new Entities.User
         {
@@ -101,12 +80,6 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
             Name = request.Name,
             Role = role,
             UseFlag = request.UseFlag,
-            CreatedDateTime = now,
-            ModifiedDateTime = now,
-            CreatedSid = currentUserService.Sid,
-            CreatedName = currentUserService.UserName,
-            ModifiedSid = currentUserService.Sid,
-            ModifiedName = currentUserService.UserName,
         };
         entity.PasswordHash = Hasher.HashPassword(entity, request.Password);
 
@@ -144,11 +117,8 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         entity.Name = request.Name;
         entity.Role = role;
         entity.UseFlag = request.UseFlag;
-        entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedSid = currentUserService.Sid;
-        entity.ModifiedName = currentUserService.UserName;
 
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
         return ToDto(entity);
     }
 
@@ -164,11 +134,8 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), request.Version);
 
         entity.PasswordHash = Hasher.HashPassword(entity, request.Password);
-        entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedSid = currentUserService.Sid;
-        entity.ModifiedName = currentUserService.UserName;
 
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
         return ToDto(entity);
     }
 
@@ -188,7 +155,7 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
 
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
         db.Users.Remove(entity);
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
     }
 
     /// <summary>操作対象を除いて、有効な管理者が他に1人以上いることを確認する（Takazono.Oliveの`CheckUpdateDeleteUserAsync`相当。全体でAdminが0人になるロックアウトを防ぐ）。</summary>
@@ -206,26 +173,8 @@ public class UserService(AppDbContext db, ICurrentUserService currentUserService
     private static Entities.RoleKubun ParseRole(string role) =>
         Enum.TryParse<Entities.RoleKubun>(role, out var parsed) ? parsed : throw new BusinessRuleAppException($"ロール '{role}' は不正です。");
 
-    /// <summary>半角/全角スペースで区切って複数キーワードに分解する（Storeと同じくTakazono.Oliveの`filterFreeWord`相当）。</summary>
-    private static string[] SplitKeywords(string? keyword) =>
-        string.IsNullOrWhiteSpace(keyword)
-            ? []
-            : keyword.Split([' ', '　'], StringSplitOptions.RemoveEmptyEntries);
-
     private async Task<Entities.User> FindOrThrowAsync(long sid, CancellationToken ct) =>
         await db.Users.FindAsync([sid], ct) ?? throw new NotFoundAppException($"ユーザー(Sid={sid})が見つかりません。");
-
-    private async Task SaveWithConcurrencyCheckAsync(CancellationToken ct)
-    {
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
-        }
-    }
 
     public async Task<byte[]> DownloadCsvAsync(string? language, CancellationToken ct)
     {

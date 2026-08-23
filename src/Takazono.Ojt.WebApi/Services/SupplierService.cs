@@ -8,7 +8,7 @@ using Takazono.Ojt.WebApi.Dtos.Supplier;
 
 namespace Takazono.Ojt.WebApi.Services;
 
-public class SupplierService(AppDbContext db, ICurrentUserService currentUserService) : ISupplierService
+public class SupplierService(AppDbContext db) : ISupplierService
 {
     private static readonly HashSet<string> AllowedSortKeys = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -25,7 +25,7 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
         }
 
         // フリーワード(名称、複数語はAND・部分一致)とコード(完全一致)を別条件として適用する(Storeと同じ検索仕様)。
-        foreach (var word in SplitKeywords(request.Keyword))
+        foreach (var word in KeywordSearchHelper.Split(request.Keyword))
         {
             query = query.Where(x => x.Name.Contains(word));
         }
@@ -37,8 +37,8 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
 
         var totalCount = await query.CountAsync(ct);
 
-        var sortKey = AllowedSortKeys.Contains(request.SortKey ?? string.Empty) ? request.SortKey! : "displayOrderNumber";
-        var descending = string.Equals(request.SortDirection, SortDirections.Descending, StringComparison.OrdinalIgnoreCase);
+        var sortKey = PagingHelper.ResolveSortKey(request.SortKey, AllowedSortKeys, "displayOrderNumber");
+        var descending = PagingHelper.IsDescending(request.SortDirection);
 
         IOrderedQueryable<Entities.Supplier> sortedQuery = sortKey.ToLowerInvariant() switch
         {
@@ -47,26 +47,8 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
             "useflag" => descending ? query.OrderByDescending(x => x.UseFlag) : query.OrderBy(x => x.UseFlag),
             _ => descending ? query.OrderByDescending(x => x.DisplayOrderNumber) : query.OrderBy(x => x.DisplayOrderNumber),
         };
-        sortedQuery = sortedQuery.ThenBy(x => x.Sid);
 
-        var pageNumber = Math.Max(1, request.PageNumber);
-        var pageSize = Math.Max(1, request.PageSize);
-
-        var items = await sortedQuery
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => ToDto(x))
-            .ToListAsync(ct);
-
-        return new PagedResult<SupplierDto>
-        {
-            Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            SortKey = sortKey,
-            SortDirection = descending ? SortDirections.Descending : SortDirections.Ascending,
-        };
+        return await PagingHelper.BuildAsync(sortedQuery, totalCount, request.PageNumber, request.PageSize, sortKey, descending, ToDto, ct);
     }
 
     public async Task<SupplierDto> GetAsync(long sid, CancellationToken ct)
@@ -83,7 +65,6 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
         }
 
         var maxOrder = await db.Suppliers.MaxAsync(x => (int?)x.DisplayOrderNumber, ct) ?? 0;
-        var now = DateTime.Now;
 
         var entity = new Entities.Supplier
         {
@@ -98,12 +79,6 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
             TransactionStartDate = request.TransactionStartDate,
             UseFlag = request.UseFlag,
             DisplayOrderNumber = maxOrder + 1,
-            CreatedDateTime = now,
-            ModifiedDateTime = now,
-            CreatedSid = currentUserService.Sid,
-            CreatedName = currentUserService.UserName,
-            ModifiedSid = currentUserService.Sid,
-            ModifiedName = currentUserService.UserName,
         };
 
         db.Suppliers.Add(entity);
@@ -140,11 +115,8 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
         entity.CreditLimit = request.CreditLimit;
         entity.TransactionStartDate = request.TransactionStartDate;
         entity.UseFlag = request.UseFlag;
-        entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedSid = currentUserService.Sid;
-        entity.ModifiedName = currentUserService.UserName;
 
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
         return ToDto(entity);
     }
 
@@ -153,42 +125,34 @@ public class SupplierService(AppDbContext db, ICurrentUserService currentUserSer
         var entity = await FindOrThrowAsync(sid, ct);
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
         db.Suppliers.Remove(entity);
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
     {
-        var entities = await db.Suppliers.Where(x => request.OrderedSids.Contains(x.Sid)).ToListAsync(ct);
-        foreach (var entity in entities)
+        var sids = request.Items.Select(x => x.Sid).ToList();
+        var entities = await db.Suppliers.Where(x => sids.Contains(x.Sid)).ToDictionaryAsync(x => x.Sid, ct);
+
+        for (var i = 0; i < request.Items.Count; i++)
         {
-            entity.DisplayOrderNumber = request.OrderedSids.IndexOf(entity.Sid) + 1;
+            var item = request.Items[i];
+            if (!entities.TryGetValue(item.Sid, out var entity))
+            {
+                throw new NotFoundAppException($"取引先(Sid={item.Sid})が見つかりません。");
+            }
+
+            ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), item.Version);
+            entity.DisplayOrderNumber = i + 1;
         }
+
         await db.SaveChangesAsync(ct);
     }
-
-    /// <summary>半角/全角スペースで区切って複数キーワードに分解する(Storeと同じ)。</summary>
-    private static string[] SplitKeywords(string? keyword) =>
-        string.IsNullOrWhiteSpace(keyword)
-            ? []
-            : keyword.Split([' ', '　'], StringSplitOptions.RemoveEmptyEntries);
 
     private static Entities.SupplierTypeKubun ParseSupplierTypeKubun(string value) =>
         Enum.TryParse<Entities.SupplierTypeKubun>(value, out var parsed) ? parsed : throw new BusinessRuleAppException($"取引先区分 '{value}' は不正です。");
 
     private async Task<Entities.Supplier> FindOrThrowAsync(long sid, CancellationToken ct) =>
         await db.Suppliers.FindAsync([sid], ct) ?? throw new NotFoundAppException($"取引先(Sid={sid})が見つかりません。");
-
-    private async Task SaveWithConcurrencyCheckAsync(CancellationToken ct)
-    {
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
-        }
-    }
 
     public async Task<byte[]> DownloadCsvAsync(string? language, CancellationToken ct)
     {

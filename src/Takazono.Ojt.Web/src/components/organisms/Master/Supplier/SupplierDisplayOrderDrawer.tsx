@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 
 import type { SupplierDto } from '@/api/@types'
 import { Box, Button, Drawer, Stack, Typography } from '@/components/atoms/Mui'
+import { ConcurrencyConflictDialog } from '@/components/molecules/Common/ConcurrencyConflictDialog'
 import { DndTableBody, DndTableHead, DndTableRow } from '@/components/molecules/Common/DndTable'
 import { useApi } from '@/hooks/useApi'
+import { useDisplayValidationError } from '@/hooks/useDisplayValidationError'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { searchSuppliers, updateSupplierDisplayOrder } from '@/services/supplierApi'
 import { reorder } from '@/utils/reorder'
@@ -53,6 +55,7 @@ type Props = {
 export const SupplierDisplayOrderDrawer = ({ open, onClose, onSaved }: Props) => {
   const { getLabel } = useLocalizationLabels()
   const { api } = useApi()
+  const { displayValidationError, concurrencyMessage, closeConcurrencyDialog } = useDisplayValidationError()
   const [items, setItems] = useState<SupplierDto[]>([])
 
   const fetchAll = useCallback(async () => {
@@ -79,9 +82,11 @@ export const SupplierDisplayOrderDrawer = ({ open, onClose, onSaved }: Props) =>
   }
 
   const handleSave = async () => {
-    await api(() => updateSupplierDisplayOrder({ orderedSids: items.map((item) => item.sid!) }), {
+    const req = { items: items.map((item) => ({ sid: item.sid!, version: item.version ?? '' })) }
+    await api(() => updateSupplierDisplayOrder(req), {
       successMessage: getLabel('M0002') /* 更新しました。 */,
       onSuccess: onSaved,
+      onError: (err) => displayValidationError(err, undefined, { onConcurrencyConflict: onSaved }),
     })
   }
 
@@ -117,6 +122,11 @@ export const SupplierDisplayOrderDrawer = ({ open, onClose, onSaved }: Props) =>
           </DndTableBody>
         </Box>
       </Box>
+      <ConcurrencyConflictDialog
+        open={concurrencyMessage !== null}
+        message={concurrencyMessage ?? ''}
+        onReload={closeConcurrencyDialog}
+      />
     </Drawer>
   )
 }

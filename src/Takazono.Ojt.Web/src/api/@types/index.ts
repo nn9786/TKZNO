@@ -195,8 +195,13 @@ export type UpdateCustomerRequest = {
   version: string
 }
 
+export type UpdateDisplayOrderItem = {
+  sid?: number | undefined
+  version?: string | null | undefined
+}
+
 export type UpdateDisplayOrderRequest = {
-  orderedSids?: number[] | null | undefined
+  items?: UpdateDisplayOrderItem[] | null | undefined
 }
 
 export type UpdateStoreRequest = {

@@ -5,7 +5,7 @@ using Takazono.Ojt.WebApi.Dtos.Unit;
 
 namespace Takazono.Ojt.WebApi.Services;
 
-public class UnitService(AppDbContext db, ICurrentUserService currentUserService) : IUnitService
+public class UnitService(AppDbContext db) : IUnitService
 {
     private static readonly HashSet<string> AllowedSortKeys = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -23,11 +23,9 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
 
         var totalCount = await query.CountAsync(ct);
 
-        var sortKey = AllowedSortKeys.Contains(request.SortKey ?? string.Empty) ? request.SortKey! : "displayOrderNumber";
-        var descending = string.Equals(request.SortDirection, SortDirections.Descending, StringComparison.OrdinalIgnoreCase);
+        var sortKey = PagingHelper.ResolveSortKey(request.SortKey, AllowedSortKeys, "displayOrderNumber");
+        var descending = PagingHelper.IsDescending(request.SortDirection);
 
-        // 各キーの後ろにSid昇順のタイブレーカーを付け、同値行が並ぶ場合でもページ送りで重複/欠落が起きないようにする
-        // （SQL Serverは単一列ソートで同値行の順序を保証しないため）。
         IOrderedQueryable<Entities.Unit> sortedQuery = sortKey.ToLowerInvariant() switch
         {
             "code" => descending ? query.OrderByDescending(x => x.Code) : query.OrderBy(x => x.Code),
@@ -35,26 +33,8 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
             "useflag" => descending ? query.OrderByDescending(x => x.UseFlag) : query.OrderBy(x => x.UseFlag),
             _ => descending ? query.OrderByDescending(x => x.DisplayOrderNumber) : query.OrderBy(x => x.DisplayOrderNumber),
         };
-        sortedQuery = sortedQuery.ThenBy(x => x.Sid);
 
-        var pageNumber = Math.Max(1, request.PageNumber);
-        var pageSize = Math.Max(1, request.PageSize);
-
-        var items = await sortedQuery
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => ToDto(x))
-            .ToListAsync(ct);
-
-        return new PagedResult<UnitDto>
-        {
-            Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            SortKey = sortKey,
-            SortDirection = descending ? SortDirections.Descending : SortDirections.Ascending,
-        };
+        return await PagingHelper.BuildAsync(sortedQuery, totalCount, request.PageNumber, request.PageSize, sortKey, descending, ToDto, ct);
     }
 
     public async Task<IReadOnlyList<UnitDto>> GetAllAsync(CancellationToken ct) =>
@@ -79,7 +59,6 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
         }
 
         var maxOrder = await db.Units.MaxAsync(x => (int?)x.DisplayOrderNumber, ct) ?? 0;
-        var now = DateTime.Now;
 
         var entity = new Entities.Unit
         {
@@ -87,12 +66,6 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
             Name = request.Name,
             UseFlag = request.UseFlag,
             DisplayOrderNumber = maxOrder + 1,
-            CreatedDateTime = now,
-            ModifiedDateTime = now,
-            CreatedSid = currentUserService.Sid,
-            CreatedName = currentUserService.UserName,
-            ModifiedSid = currentUserService.Sid,
-            ModifiedName = currentUserService.UserName,
         };
 
         db.Units.Add(entity);
@@ -119,11 +92,8 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
         entity.Code = request.Code;
         entity.Name = request.Name;
         entity.UseFlag = request.UseFlag;
-        entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedSid = currentUserService.Sid;
-        entity.ModifiedName = currentUserService.UserName;
 
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
         return ToDto(entity);
     }
 
@@ -138,33 +108,31 @@ public class UnitService(AppDbContext db, ICurrentUserService currentUserService
 
         ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
         db.Units.Remove(entity);
-        await SaveWithConcurrencyCheckAsync(ct);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
     {
-        var entities = await db.Units.Where(x => request.OrderedSids.Contains(x.Sid)).ToListAsync(ct);
-        foreach (var entity in entities)
+        var sids = request.Items.Select(x => x.Sid).ToList();
+        var entities = await db.Units.Where(x => sids.Contains(x.Sid)).ToDictionaryAsync(x => x.Sid, ct);
+
+        for (var i = 0; i < request.Items.Count; i++)
         {
-            entity.DisplayOrderNumber = request.OrderedSids.IndexOf(entity.Sid) + 1;
+            var item = request.Items[i];
+            if (!entities.TryGetValue(item.Sid, out var entity))
+            {
+                throw new NotFoundAppException($"単位(Sid={item.Sid})が見つかりません。");
+            }
+
+            ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), item.Version);
+            entity.DisplayOrderNumber = i + 1;
         }
+
         await db.SaveChangesAsync(ct);
     }
 
     private async Task<Entities.Unit> FindOrThrowAsync(long sid, CancellationToken ct) =>
         await db.Units.FindAsync([sid], ct) ?? throw new NotFoundAppException($"単位(Sid={sid})が見つかりません。");
-
-    private async Task SaveWithConcurrencyCheckAsync(CancellationToken ct)
-    {
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
-        }
-    }
 
     private static UnitDto ToDto(Entities.Unit x) => new()
     {

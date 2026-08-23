@@ -27,7 +27,9 @@ public class AuthController(AppDbContext db, JwtTokenService tokenService) : Con
         return Ok(new LoginResponse
         {
             Token = token,
+            Sid = user.Sid,
             UserName = user.UserName,
+            Name = user.Name,
             Role = user.Role.ToString(),
             ExpiresAtUtc = expiresAtUtc,
         });

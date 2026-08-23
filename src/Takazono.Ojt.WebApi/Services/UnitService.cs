@@ -5,8 +5,13 @@ using Takazono.Ojt.WebApi.Dtos.Unit;
 
 namespace Takazono.Ojt.WebApi.Services;
 
-public class UnitService(AppDbContext db) : IUnitService
+public class UnitService(AppDbContext db, ICurrentUserService currentUserService) : IUnitService
 {
+    private static readonly HashSet<string> AllowedSortKeys = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "code", "name", "useFlag", "displayOrderNumber",
+    };
+
     public async Task<PagedResult<UnitDto>> SearchAsync(SearchUnitRequest request, CancellationToken ct)
     {
         var query = db.Units.AsNoTracking().AsQueryable();
@@ -16,28 +21,49 @@ public class UnitService(AppDbContext db) : IUnitService
             query = query.Where(x => x.UseFlag);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Keyword))
-        {
-            query = query.Where(x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword));
-        }
-
         var totalCount = await query.CountAsync(ct);
 
-        var items = await query
-            .OrderBy(x => x.DisplayOrderNumber)
-            .Skip((request.PageNumber - 1) * request.PageSize)
-            .Take(request.PageSize)
+        var sortKey = AllowedSortKeys.Contains(request.SortKey ?? string.Empty) ? request.SortKey! : "displayOrderNumber";
+        var descending = string.Equals(request.SortDirection, SortDirections.Descending, StringComparison.OrdinalIgnoreCase);
+
+        // 各キーの後ろにSid昇順のタイブレーカーを付け、同値行が並ぶ場合でもページ送りで重複/欠落が起きないようにする
+        // （SQL Serverは単一列ソートで同値行の順序を保証しないため）。
+        IOrderedQueryable<Entities.Unit> sortedQuery = sortKey.ToLowerInvariant() switch
+        {
+            "code" => descending ? query.OrderByDescending(x => x.Code) : query.OrderBy(x => x.Code),
+            "name" => descending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
+            "useflag" => descending ? query.OrderByDescending(x => x.UseFlag) : query.OrderBy(x => x.UseFlag),
+            _ => descending ? query.OrderByDescending(x => x.DisplayOrderNumber) : query.OrderBy(x => x.DisplayOrderNumber),
+        };
+        sortedQuery = sortedQuery.ThenBy(x => x.Sid);
+
+        var pageNumber = Math.Max(1, request.PageNumber);
+        var pageSize = Math.Max(1, request.PageSize);
+
+        var items = await sortedQuery
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(x => ToDto(x))
             .ToListAsync(ct);
 
         return new PagedResult<UnitDto>
         {
             Items = items,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
             TotalCount = totalCount,
+            SortKey = sortKey,
+            SortDirection = descending ? SortDirections.Descending : SortDirections.Ascending,
         };
     }
+
+    public async Task<IReadOnlyList<UnitDto>> GetAllAsync(CancellationToken ct) =>
+        await db.Units
+            .AsNoTracking()
+            .Where(x => x.UseFlag)
+            .OrderBy(x => x.DisplayOrderNumber)
+            .Select(x => ToDto(x))
+            .ToListAsync(ct);
 
     public async Task<UnitDto> GetAsync(long sid, CancellationToken ct)
     {
@@ -63,8 +89,10 @@ public class UnitService(AppDbContext db) : IUnitService
             DisplayOrderNumber = maxOrder + 1,
             CreatedDateTime = now,
             ModifiedDateTime = now,
-            CreatedName = "system",
-            ModifiedName = "system",
+            CreatedSid = currentUserService.Sid,
+            CreatedName = currentUserService.UserName,
+            ModifiedSid = currentUserService.Sid,
+            ModifiedName = currentUserService.UserName,
         };
 
         db.Units.Add(entity);
@@ -76,28 +104,41 @@ public class UnitService(AppDbContext db) : IUnitService
     {
         var entity = await FindOrThrowAsync(sid, ct);
 
+        if (entity.UnDeleteFlag && !request.UseFlag)
+        {
+            throw new BusinessRuleAppException($"単位 '{entity.Name}' は削除保護されているため、使用中止にできません。");
+        }
+
         if (await db.Units.AnyAsync(x => x.Code == request.Code && x.Sid != sid, ct))
         {
             throw new ConflictAppException($"単位コード '{request.Code}' は既に使用されています。");
         }
 
-        db.Entry(entity).Property(x => x.Version).OriginalValue = Convert.FromBase64String(request.Version);
+        ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), request.Version);
 
         entity.Code = request.Code;
         entity.Name = request.Name;
         entity.UseFlag = request.UseFlag;
         entity.ModifiedDateTime = DateTime.Now;
-        entity.ModifiedName = "system";
+        entity.ModifiedSid = currentUserService.Sid;
+        entity.ModifiedName = currentUserService.UserName;
 
         await SaveWithConcurrencyCheckAsync(ct);
         return ToDto(entity);
     }
 
-    public async Task DeleteAsync(long sid, CancellationToken ct)
+    public async Task DeleteAsync(long sid, string version, CancellationToken ct)
     {
         var entity = await FindOrThrowAsync(sid, ct);
+
+        if (entity.UnDeleteFlag)
+        {
+            throw new BusinessRuleAppException($"単位 '{entity.Name}' は削除保護されているため削除できません。");
+        }
+
+        ConcurrencyHelper.ApplyVersionOriginalValue(db.Entry(entity), version);
         db.Units.Remove(entity);
-        await db.SaveChangesAsync(ct);
+        await SaveWithConcurrencyCheckAsync(ct);
     }
 
     public async Task UpdateDisplayOrderAsync(UpdateDisplayOrderRequest request, CancellationToken ct)
@@ -121,7 +162,7 @@ public class UnitService(AppDbContext db) : IUnitService
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new ConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
+            throw new ConcurrencyConflictAppException("他のユーザーによって更新されています。画面を再読み込みしてください。");
         }
     }
 
@@ -132,6 +173,11 @@ public class UnitService(AppDbContext db) : IUnitService
         Name = x.Name,
         UseFlag = x.UseFlag,
         DisplayOrderNumber = x.DisplayOrderNumber,
+        UnDeleteFlag = x.UnDeleteFlag,
         Version = Convert.ToBase64String(x.Version),
+        CreatedDateTime = x.CreatedDateTime,
+        CreatedName = x.CreatedName,
+        ModifiedDateTime = x.ModifiedDateTime,
+        ModifiedName = x.ModifiedName,
     };
 }

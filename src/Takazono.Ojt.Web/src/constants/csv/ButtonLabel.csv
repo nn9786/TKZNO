@@ -6,3 +6,5 @@ B0004,キャンセル,Cancel
 B0005,削除,Delete
 B0006,編集,Edit
 B0007,閉じる,Close
+B0008,CSV出力,Export CSV
+B0009,再読み込み,Reload

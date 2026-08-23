@@ -20,6 +20,7 @@ public class JwtTokenService(IOptions<JwtOptions> jwtOptions)
             new Claim(ClaimTypes.NameIdentifier, user.Sid.ToString()),
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("displayName", user.Name),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));

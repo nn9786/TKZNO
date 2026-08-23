@@ -4,9 +4,9 @@ import { AppBar, Box, Button, MenuItem, Select, Toolbar, Typography } from '@/co
 import { ROUTE } from '@/constants/route'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppDispatch, useAppSelector } from '@/hooks/useStore'
-import { appColors } from '@/styles/theme'
 import { loggedOut } from '@/store/slice/authSlice'
-import { languageChanged, type Language } from '@/store/slice/settingSlice'
+import { type Language, languageChanged } from '@/store/slice/settingSlice'
+import { appColors } from '@/styles/theme'
 
 const styles = {
   appBar: {
@@ -54,7 +54,7 @@ export const Header = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { getLabel, language } = useLocalizationLabels()
-  const userName = useAppSelector((state) => state.auth.userName)
+  const displayName = useAppSelector((state) => state.auth.name ?? state.auth.userName)
 
   const handleLogout = () => {
     dispatch(loggedOut())
@@ -75,9 +75,9 @@ export const Header = () => {
             </Typography>
           </Button>
         </Box>
-        {userName && (
+        {displayName && (
           <Typography variant="body2" sx={styles.userChip}>
-            {userName}
+            {displayName}
           </Typography>
         )}
         <Select
@@ -85,6 +85,7 @@ export const Header = () => {
           value={language}
           onChange={(e) => dispatch(languageChanged(e.target.value as Language))}
           sx={styles.languageSelect}
+          inputProps={{ 'aria-label': getLabel('T0072') /* 表示言語 */ }}
         >
           <MenuItem value="ja">日本語</MenuItem>
           <MenuItem value="en">English</MenuItem>

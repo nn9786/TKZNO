@@ -1,6 +1,5 @@
-import { useCallback } from 'react'
-
 import { useSnackbar } from 'notistack'
+import { useCallback } from 'react'
 
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppDispatch } from '@/hooks/useStore'
@@ -33,14 +32,16 @@ export const useApi = () => {
         if (options?.onError) {
           options.onError(error)
         } else {
-          enqueueSnackbar(extractErrorMessage(error, getLabel('M0005') /* 予期しないエラーが発生しました。 */), { variant: 'error' })
+          enqueueSnackbar(extractErrorMessage(error, getLabel('M0005') /* 予期しないエラーが発生しました。 */), {
+            variant: 'error',
+          })
         }
         return undefined
       } finally {
         dispatch(loadingFinished())
       }
     },
-    [dispatch, enqueueSnackbar, getLabel],
+    [dispatch, enqueueSnackbar, getLabel]
   )
 
   return { api }

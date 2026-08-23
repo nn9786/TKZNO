@@ -1,10 +1,10 @@
 /* eslint-disable */
-import type { DefineMethods } from 'aspida';
-import type * as Types from '../../../../@types';
+import type { DefineMethods } from 'aspida'
+import type * as Types from '../../../../@types'
 
 export type Methods = DefineMethods<{
   put: {
-    status: 200;
-    reqBody: Types.UpdateDisplayOrderRequest;
-  };
-}>;
+    status: 200
+    reqBody: Types.UpdateDisplayOrderRequest
+  }
+}>

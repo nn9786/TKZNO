@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Takazono.Ojt.WebApi.Common;
@@ -15,6 +16,11 @@ public class StoreController(IStoreService storeService) : ControllerBase
     public async Task<ActionResult<PagedResult<StoreDto>>> Search([FromQuery] SearchStoreRequest request, CancellationToken ct) =>
         Ok(await storeService.SearchAsync(request, ct));
 
+    /// <summary>ページングなし全件取得（有効なもののみ）。他マスタからの店舗選択セレクトボックス向け。</summary>
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<StoreDto>>> GetAll(CancellationToken ct) =>
+        Ok(await storeService.GetAllAsync(ct));
+
     [HttpGet("{sid:long}")]
     public async Task<ActionResult<StoreDto>> Get(long sid, CancellationToken ct) =>
         Ok(await storeService.GetAsync(sid, ct));
@@ -31,9 +37,9 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     [HttpDelete("{sid:long}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(long sid, CancellationToken ct)
+    public async Task<IActionResult> Delete(long sid, [FromQuery, Required] string version, CancellationToken ct)
     {
-        await storeService.DeleteAsync(sid, ct);
+        await storeService.DeleteAsync(sid, version, ct);
         return NoContent();
     }
 
@@ -43,5 +49,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
     {
         await storeService.UpdateDisplayOrderAsync(request, ct);
         return NoContent();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadCsv([FromQuery] string? language, CancellationToken ct)
+    {
+        var bytes = await storeService.DownloadCsvAsync(language, ct);
+        return File(bytes, "text/csv", "store.csv");
     }
 }

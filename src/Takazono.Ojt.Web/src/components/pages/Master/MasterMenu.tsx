@@ -1,13 +1,17 @@
-import { useNavigate } from 'react-router-dom'
-
+// マスタメニュー画面
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded'
+import Diversity1RoundedIcon from '@mui/icons-material/Diversity1Rounded'
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded'
+import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import StraightenRoundedIcon from '@mui/icons-material/StraightenRounded'
+import { useNavigate } from 'react-router-dom'
 
 import { Box, Paper, Stack, Typography } from '@/components/atoms/Mui'
 import { Base } from '@/components/templates/Base'
 import { ROUTE } from '@/constants/route'
 import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
+import { useAppSelector } from '@/hooks/useStore'
 import { appColors } from '@/styles/theme'
 
 const styles = {
@@ -74,8 +78,22 @@ const getCardStyle = (tone: string, border: string) => ({
 export const MasterMenu = () => {
   const { getLabel } = useLocalizationLabels()
   const navigate = useNavigate()
+  const role = useAppSelector((state) => state.auth.role)
 
   const items = [
+    // アカウント情報を扱うため、Adminのみカードを表示する（画面自体もProtectedRouteでAdmin限定）
+    ...(role === 'Admin'
+      ? [
+          {
+            label: getLabel('T0059') /* ユーザーマスタ */,
+            route: ROUTE.MASTER_USER,
+            icon: <GroupRoundedIcon fontSize="small" />,
+            caption: 'User / Login / Role',
+            tone: appColors.masterUserTone,
+            border: appColors.masterUserBorder,
+          },
+        ]
+      : []),
     {
       label: getLabel('T0002') /* 単位マスタ */,
       route: ROUTE.MASTER_UNIT,
@@ -91,6 +109,22 @@ export const MasterMenu = () => {
       caption: 'Store / Department / Staff',
       tone: appColors.masterStoreTone,
       border: appColors.masterStoreBorder,
+    },
+    {
+      label: getLabel('T0074') /* 取引先マスタ */,
+      route: ROUTE.MASTER_SUPPLIER,
+      icon: <LocalShippingRoundedIcon fontSize="small" />,
+      caption: 'Supplier / Corporate / Credit',
+      tone: appColors.masterSupplierTone,
+      border: appColors.masterSupplierBorder,
+    },
+    {
+      label: getLabel('T0083') /* 得意先マスタ */,
+      route: ROUTE.MASTER_CUSTOMER,
+      icon: <Diversity1RoundedIcon fontSize="small" />,
+      caption: 'Customer / Rank / Contract',
+      tone: appColors.masterCustomerTone,
+      border: appColors.masterCustomerBorder,
     },
   ]
 

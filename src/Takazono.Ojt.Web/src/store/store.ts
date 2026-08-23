@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
+import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
 
 import { rootReducer } from '@/store/rootReducer'
 
@@ -18,10 +18,7 @@ const storage = {
 }
 
 // ui(ローディング件数)は永続化しない。auth/settingのみ次回訪問時も保持する。
-const persistedReducer = persistReducer(
-  { key: 'root', storage, whitelist: ['auth', 'setting'] },
-  rootReducer,
-)
+const persistedReducer = persistReducer({ key: 'root', storage, whitelist: ['auth', 'setting'] }, rootReducer)
 
 export const store = configureStore({
   reducer: persistedReducer,

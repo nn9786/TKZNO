@@ -1,12 +1,12 @@
 /* eslint-disable */
-import type { DefineMethods } from 'aspida';
-import type * as Types from '../../../../@types';
+import type { DefineMethods } from 'aspida'
+import type * as Types from '../../../../@types'
 
 export type Methods = DefineMethods<{
   post: {
-    status: 200;
+    status: 200
     /** OK */
-    resBody: Types.UnitDto;
-    reqBody: Types.CreateUnitRequest;
-  };
-}>;
+    resBody: Types.UnitDto
+    reqBody: Types.CreateUnitRequest
+  }
+}>

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Takazono.Ojt.WebApi.Common;
@@ -15,6 +16,11 @@ public class UnitController(IUnitService unitService) : ControllerBase
     public async Task<ActionResult<PagedResult<UnitDto>>> Search([FromQuery] SearchUnitRequest request, CancellationToken ct) =>
         Ok(await unitService.SearchAsync(request, ct));
 
+    /// <summary>ページングなし全件取得（有効なもののみ）。他マスタからの単位選択セレクトボックス向け。</summary>
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<UnitDto>>> GetAll(CancellationToken ct) =>
+        Ok(await unitService.GetAllAsync(ct));
+
     [HttpGet("{sid:long}")]
     public async Task<ActionResult<UnitDto>> Get(long sid, CancellationToken ct) =>
         Ok(await unitService.GetAsync(sid, ct));
@@ -31,9 +37,9 @@ public class UnitController(IUnitService unitService) : ControllerBase
 
     [HttpDelete("{sid:long}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(long sid, CancellationToken ct)
+    public async Task<IActionResult> Delete(long sid, [FromQuery, Required] string version, CancellationToken ct)
     {
-        await unitService.DeleteAsync(sid, ct);
+        await unitService.DeleteAsync(sid, version, ct);
         return NoContent();
     }
 

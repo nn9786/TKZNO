@@ -9,11 +9,16 @@ using Takazono.Ojt.WebApi.Data;
 using Takazono.Ojt.WebApi.Data.Seed;
 using Takazono.Ojt.WebApi.Services;
 
+// CSV出力をExcelで開いた際の日本語文字化けを避けるため、Shift-JISで書き出す（§CSV出力機能）。
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string DevCorsPolicy = "DevCors";
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TakazonoOjtDbConnection")));
@@ -23,6 +28,9 @@ builder.Services.AddSingleton<JwtTokenService>();
 
 builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration section is missing.");

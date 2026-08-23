@@ -35,6 +35,12 @@ export const appColors = {
   masterUnitBorder: '#bfe8d7',
   masterStoreTone: 'linear-gradient(145deg, #e8f0ff 0%, #f4f8ff 100%)',
   masterStoreBorder: '#c5d6ff',
+  masterUserTone: 'linear-gradient(145deg, #fdeef2 0%, #fff6f8 100%)',
+  masterUserBorder: '#f3c9d4',
+  masterSupplierTone: 'linear-gradient(145deg, #fdf3e4 0%, #fffaf1 100%)',
+  masterSupplierBorder: '#f0ddb8',
+  masterCustomerTone: 'linear-gradient(145deg, #f2ecfb 0%, #faf7ff 100%)',
+  masterCustomerBorder: '#dccdf2',
   appBackgroundEffect:
     'radial-gradient(circle at 10% -5%, rgba(177,220,255,0.45) 0%, rgba(177,220,255,0) 45%), radial-gradient(circle at 95% 10%, rgba(133,192,246,0.2) 0%, rgba(133,192,246,0) 40%)',
 } as const

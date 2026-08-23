@@ -1,6 +1,9 @@
-import { useMemo } from 'react'
-
+// ログイン画面
 import { zodResolver } from '@hookform/resolvers/zod'
+import { isAxiosError } from 'axios'
+import { useSnackbar } from 'notistack'
+import { useEffect, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
@@ -11,7 +14,8 @@ import { useLocalizationLabels } from '@/hooks/useLocalizationLabels'
 import { useAppDispatch } from '@/hooks/useStore'
 import { login } from '@/services/authApi'
 import { loggedIn } from '@/store/slice/authSlice'
-import { useForm } from 'react-hook-form'
+import { SESSION_EXPIRED_STORAGE_KEY } from '@/utils/apiClient'
+import { extractErrorMessage } from '@/utils/extractErrorMessage'
 
 const styles = {
   root: {
@@ -40,6 +44,16 @@ export const Login = () => {
   const { api } = useApi()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
+
+  useEffect(() => {
+    if (sessionStorage.getItem(SESSION_EXPIRED_STORAGE_KEY)) {
+      sessionStorage.removeItem(SESSION_EXPIRED_STORAGE_KEY)
+      enqueueSnackbar(getLabel('M0006') /* セッションの有効期限が切れました。再度ログインしてください。 */, {
+        variant: 'info',
+      })
+    }
+  }, [enqueueSnackbar, getLabel])
 
   const schema = useMemo(
     () =>
@@ -47,7 +61,7 @@ export const Login = () => {
         userName: z.string().min(1, getLabel('V0001') /* 必須項目です。 */),
         password: z.string().min(1, getLabel('V0001') /* 必須項目です。 */),
       }),
-    [getLabel],
+    [getLabel]
   )
 
   const {
@@ -61,11 +75,30 @@ export const Login = () => {
     await api(() => login(values), {
       onSuccess: (res) => {
         if (!res.token || !res.userName || !res.role) return
-        dispatch(loggedIn({ token: res.token, userName: res.userName, role: res.role as 'Admin' | 'General' }))
+        dispatch(
+          loggedIn({
+            token: res.token,
+            sid: res.sid ?? 0,
+            userName: res.userName,
+            name: res.name ?? res.userName,
+            role: res.role as 'Admin' | 'General',
+          })
+        )
         navigate(ROUTE.DASHBOARD)
       },
-      onError: () => {
-        setError('password', { type: 'custom', message: getLabel('T0019') /* ユーザー名またはパスワードが正しくありません。 */ })
+      onError: (error) => {
+        // 401(認証失敗)のときだけ「ユーザー名またはパスワードが正しくありません」を出す。
+        // ネットワーク断や500などそれ以外の失敗まで同じ文言にすると原因が伝わらないため、その場合は実際のエラー内容をSnackbarで表示する。
+        if (isAxiosError(error) && error.response?.status === 401) {
+          setError('password', {
+            type: 'custom',
+            message: getLabel('T0019') /* ユーザー名またはパスワードが正しくありません。 */,
+          })
+        } else {
+          enqueueSnackbar(extractErrorMessage(error, getLabel('M0005') /* 予期しないエラーが発生しました。 */), {
+            variant: 'error',
+          })
+        }
       },
     })
   })
@@ -83,7 +116,6 @@ export const Login = () => {
             {...register('userName')}
             error={!!errors.userName}
             helperText={errors.userName?.message}
-            autoFocus
           />
           <TextField
             label={getLabel('T0008') /* パスワード */}
